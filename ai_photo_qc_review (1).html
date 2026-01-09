@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DirtyTag — AI Photo QC Review</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --border: #2a2a2a;
+            --border-hover: #3a3a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-muted: #555555;
+            --accent-red: #e31e24;
+            --accent-red-dim: rgba(227, 30, 36, 0.15);
+            --accent-green: #00d26a;
+            --accent-green-dim: rgba(0, 210, 106, 0.15);
+            --accent-blue: #3b82f6;
+            --accent-blue-dim: rgba(59, 130, 246, 0.15);
+            --accent-orange: #f59e0b;
+            --accent-orange-dim: rgba(245, 158, 11, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--accent-red);
+        }
+
+        .module-badge {
+            background: var(--accent-red-dim);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            padding: 4px 10px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .sku-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sku-label {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sku-value {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent-red);
+        }
+
+        .stat-value.green { color: var(--accent-green); }
+        .stat-value.blue { color: var(--accent-blue); }
+
+        .stat-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .progress-container {
+            width: 200px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--bg-tertiary);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-orange));
+            transition: width 0.4s ease;
+        }
+
+        .progress-text {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        /* Login Panel */
+        .login-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 60px);
+            padding: 40px;
+        }
+
+        .login-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            padding: 12px 14px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.85rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-red);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--accent-red);
+            border: none;
+            padding: 14px 24px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #c41a1f;
+        }
+
+        .btn-primary:disabled {
+            background: var(--bg-tertiary);
+            cursor: not-allowed;
+        }
+
+        /* Main App */
+        .main-app {
+            display: none;
+            min-height: calc(100vh - 60px);
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Photo Comparison Section */
+        .photo-section {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .comparison-column {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .column-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .column-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .column-title.raw { color: var(--accent-blue); }
+        .column-title.ai { color: var(--accent-green); }
+
+        .column-badge {
+            font-size: 0.6rem;
+            padding: 3px 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .photo-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+        }
+
+        .photo-slot {
+            background: var(--bg-primary);
+            position: relative;
+        }
+
+        .photo-slot-label {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 4px 8px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 10;
+        }
+
+        .photo-slot-label.front { color: var(--accent-red); }
+        .photo-slot-label.back { color: var(--text-secondary); }
+
+        .photo-image-container {
+            position: relative;
+            width: 100%;
+            padding-top: 125%; /* 4:5 aspect ratio */
+            background: var(--bg-tertiary);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .photo-image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform 0.3s;
+        }
+
+        .photo-image-container:hover img {
+            transform: scale(1.02);
+        }
+
+        .photo-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+        }
+
+        /* Version History */
+        .version-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .version-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .version-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-orange);
+        }
+
+        .version-grid {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            overflow-x: auto;
+        }
+
+        .version-card {
+            flex: 0 0 180px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .version-card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .version-card.selected {
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 20px var(--accent-orange-dim);
+        }
+
+        .version-card.current {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 20px var(--accent-green-dim);
+        }
+
+        .version-card-header {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .version-number {
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .version-tag {
+            font-size: 0.55rem;
+            padding: 2px 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .version-tag.current {
+            background: var(--accent-green-dim);
+            color: var(--accent-green);
+        }
+
+        .version-tag.selected {
+            background: var(--accent-orange-dim);
+            color: var(--accent-orange);
+        }
+
+        .version-thumbs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+        }
+
+        .version-thumb {
+            background: var(--bg-tertiary);
+            padding-top: 75%;
+            position: relative;
+        }
+
+        .version-thumb img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .no-versions {
+            padding: 40px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* Controls Panel */
+        .controls-panel {
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .controls-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .controls-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .controls-subtitle {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .controls-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .control-section {
+            margin-bottom: 24px;
+        }
+
+        .control-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+        }
+
+        .info-key {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Regeneration Checkboxes */
+        .regen-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .regen-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .regen-checkbox:hover {
+            border-color: var(--border-hover);
+        }
+
+        .regen-checkbox.checked {
+            border-color: var(--accent-red);
+            background: var(--accent-red-dim);
+        }
+
+        .regen-checkbox input {
+            display: none;
+        }
+
+        .checkbox-indicator {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .regen-checkbox.checked .checkbox-indicator {
+            border-color: var(--accent-red);
+            background: var(--accent-red);
+        }
+
+        .checkbox-indicator::after {
+            content: '✓';
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .regen-checkbox.checked .checkbox-indicator::after {
+            opacity: 1;
+        }
+
+        .checkbox-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Action Buttons */
+        .controls-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-approve {
+            width: 100%;
+            background: var(--accent-green);
+            border: none;
+            padding: 16px 24px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-approve:hover {
+            background: #00b85c;
+        }
+
+        .btn-approve:disabled {
+            background: var(--bg-tertiary);
+            cursor: not-allowed;
+        }
+
+        .btn-regenerate {
+            width: 100%;
+            background: transparent;
+            border: 2px solid var(--accent-red);
+            padding: 14px 24px;
+            color: var(--accent-red);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-regenerate:hover {
+            background: var(--accent-red-dim);
+        }
+
+        .btn-regenerate:disabled {
+            border-color: var(--bg-tertiary);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .btn-skip {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 12px 24px;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-skip:hover {
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 14px 28px;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .toast.error {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .toast.info {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            gap: 16px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent-red);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 40px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .empty-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--accent-green);
+        }
+
+        .empty-text {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Keyboard Hints */
+        .keyboard-hints {
+            display: flex;
+            gap: 16px;
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-primary);
+        }
+
+        .hint {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .hint kbd {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 2px 6px;
+            font-family: inherit;
+        }
+
+        /* Error */
+        .error-container {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .error-title {
+            color: var(--accent-red);
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+
+        .error-message {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: left;
+            overflow-x: auto;
+        }
+
+        .btn-retry {
+            background: var(--accent-red);
+            border: none;
+            padding: 12px 24px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo-section">
+                <div class="logo">DIRTY<span>TAG</span></div>
+                <div class="module-badge">AI Photo QC</div>
+            </div>
+            <div class="sku-display" id="sku-display" style="display: none;">
+                <span class="sku-label">SKU</span>
+                <span class="sku-value" id="current-sku">—</span>
+            </div>
+        </div>
+        <div class="header-right" id="header-stats" style="display: none;">
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-pending">0</div>
+                    <div class="stat-label">Da Verificare</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value green" id="stat-approved">0</div>
+                    <div class="stat-label">Approvati</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value blue" id="stat-regen">0</div>
+                    <div class="stat-label">Rigenerati</div>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="progress-text" id="progress-text">0% completato</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Login Panel -->
+    <div class="login-panel" id="login-panel">
+        <div class="login-card">
+            <h1 class="login-title">AI Photo QC Review</h1>
+            <p class="login-subtitle">Sistema di quality check per foto AI-generated</p>
+            
+            <div class="form-group">
+                <label class="form-label">Airtable API Key</label>
+                <input type="password" class="form-input" id="api-key" placeholder="pat...">
+            </div>
+            
+            <button class="btn-primary" onclick="startApp()">Avvia Review</button>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="main-app" id="main-app">
+        <div class="app-container">
+            <!-- Photo Section -->
+            <div class="photo-section" id="photo-section">
+                <!-- Content loaded dynamically -->
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="controls-panel">
+                <div class="controls-header">
+                    <div class="controls-title">Quality Check</div>
+                    <div class="controls-subtitle">Verifica e approva le foto AI</div>
+                </div>
+
+                <div class="controls-body">
+                    <div class="control-section">
+                        <div class="control-label">Informazioni Prodotto</div>
+                        <div class="info-grid" id="product-info">
+                            <!-- Loaded dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <div class="control-label">Versione Visualizzata</div>
+                        <div class="info-grid">
+                            <div class="info-row">
+                                <span class="info-key">Versione</span>
+                                <span class="info-value" id="viewing-version">v1</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-key">Generazioni Tot.</span>
+                                <span class="info-value" id="total-versions">1</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <div class="control-label">Rigenerazione Selettiva</div>
+                        <div class="regen-options">
+                            <label class="regen-checkbox" id="regen-front-box" onclick="toggleRegenOption('front')">
+                                <input type="checkbox" id="regen-front">
+                                <span class="checkbox-indicator"></span>
+                                <span class="checkbox-label">Rigenera FRONT</span>
+                            </label>
+                            <label class="regen-checkbox" id="regen-back-box" onclick="toggleRegenOption('back')">
+                                <input type="checkbox" id="regen-back">
+                                <span class="checkbox-indicator"></span>
+                                <span class="checkbox-label">Rigenera BACK</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls-footer">
+                    <button class="btn-approve" id="btn-approve" onclick="approvePhotos()">
+                        ✓ Approva Versione
+                    </button>
+                    <button class="btn-regenerate" id="btn-regenerate" onclick="triggerRegeneration()" disabled>
+                        ↻ Rigenera Selezionate
+                    </button>
+                    <button class="btn-skip" onclick="skipProduct()">
+                        Salta Prodotto →
+                    </button>
+                </div>
+
+                <div class="keyboard-hints">
+                    <div class="hint"><kbd>A</kbd> Approva</div>
+                    <div class="hint"><kbd>R</kbd> Rigenera</div>
+                    <div class="hint"><kbd>→</kbd> Salta</div>
+                    <div class="hint"><kbd>1-9</kbd> Versione</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal" onclick="closeModal()">
+        <span class="modal-close">×</span>
+        <img id="modal-img" src="" alt="Full size">
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Configuration - DirtyTag 3.0
+        const BASE_ID = 'apptD8GSxN3vhhivI';
+        const INVENTARIO_TABLE = 'tbl2bvgqx5dFHn9l0';
+        
+        let API_KEY = '';
+        let allRecords = [];
+        let pendingRecords = [];
+        let currentRecord = null;
+        let currentVersions = [];
+        let selectedVersion = null;
+        let stats = { pending: 0, approved: 0, regenerated: 0 };
+
+        // Init
+        window.onload = function() {
+            const savedKey = localStorage.getItem('dirtytag_api_key_v3');
+            if (savedKey) {
+                document.getElementById('api-key').value = savedKey;
+            }
+        };
+
+        function startApp() {
+            const key = document.getElementById('api-key').value.trim();
+            if (!key) {
+                showToast('Inserisci la chiave API', 'error');
+                return;
+            }
+            API_KEY = key;
+            localStorage.setItem('dirtytag_api_key_v3', key);
+            
+            document.getElementById('login-panel').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('sku-display').style.display = 'flex';
+            document.getElementById('header-stats').style.display = 'flex';
+            
+            loadPendingRecords();
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.className = 'toast', 2500);
+        }
+
+        async function apiRequest(table, options = {}) {
+            let url = `https://api.airtable.com/v0/${BASE_ID}/${table}`;
+            
+            if (options.recordId) {
+                url += `/${options.recordId}`;
+            }
+            
+            const params = new URLSearchParams();
+            if (options.filterByFormula) {
+                params.append('filterByFormula', options.filterByFormula);
+            }
+            if (options.sort) {
+                options.sort.forEach((s, i) => {
+                    params.append(`sort[${i}][field]`, s.field);
+                    params.append(`sort[${i}][direction]`, s.direction || 'asc');
+                });
+            }
+            if (options.offset) {
+                params.append('offset', options.offset);
+            }
+            
+            const queryString = params.toString();
+            if (queryString) {
+                url += `?${queryString}`;
+            }
+
+            const fetchOptions = {
+                headers: {
+                    'Authorization': `Bearer ${API_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            if (options.method) {
+                fetchOptions.method = options.method;
+            }
+            if (options.body) {
+                fetchOptions.body = JSON.stringify(options.body);
+            }
+
+            const response = await fetch(url, fetchOptions);
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status} - ${JSON.stringify(data.error || data)}`);
+            }
+
+            return data;
+        }
+
+        async function loadPendingRecords() {
+            showLoading('Caricamento prodotti in attesa di QC...');
+
+            try {
+                allRecords = [];
+                let offset = null;
+                
+                // Filter: AI_Quality_Check = PENDING
+                const formula = "{AI_Quality_Check} = 'PENDING'";
+                
+                do {
+                    const data = await apiRequest(INVENTARIO_TABLE, { 
+                        filterByFormula: formula,
+                        sort: [{ field: 'SKU', direction: 'asc' }],
+                        offset 
+                    });
+                    allRecords = allRecords.concat(data.records);
+                    offset = data.offset;
+                } while (offset);
+
+                pendingRecords = allRecords;
+                stats.pending = pendingRecords.length;
+                updateStatsUI();
+                
+                loadNextProduct();
+
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function updateStatsUI() {
+            document.getElementById('stat-pending').textContent = stats.pending;
+            document.getElementById('stat-approved').textContent = stats.approved;
+            document.getElementById('stat-regen').textContent = stats.regenerated;
+            
+            const total = stats.pending + stats.approved + stats.regenerated;
+            const progress = total > 0 ? ((stats.approved + stats.regenerated) / total) * 100 : 0;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+            document.getElementById('progress-text').textContent = `${Math.round(progress)}% completato`;
+        }
+
+        function loadNextProduct() {
+            // Reset UI
+            document.getElementById('regen-front').checked = false;
+            document.getElementById('regen-back').checked = false;
+            document.getElementById('regen-front-box').classList.remove('checked');
+            document.getElementById('regen-back-box').classList.remove('checked');
+            updateRegenButton();
+
+            if (pendingRecords.length === 0) {
+                showEmptyState();
+                return;
+            }
+
+            currentRecord = pendingRecords[0];
+            const fields = currentRecord.fields;
+            
+            document.getElementById('current-sku').textContent = fields.SKU || '—';
+            
+            // Load product info
+            renderProductInfo(fields);
+            
+            // Build version structure and render photos
+            buildVersionsAndRender(fields);
+        }
+
+        function renderProductInfo(fields) {
+            const container = document.getElementById('product-info');
+            container.innerHTML = `
+                <div class="info-row">
+                    <span class="info-key">Brand</span>
+                    <span class="info-value">${fields.Brand || '—'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-key">Categoria</span>
+                    <span class="info-value">${fields.Category || '—'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-key">AI Mode</span>
+                    <span class="info-value">${fields.AI_Mode_Selected || 'MANI'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-key">Status</span>
+                    <span class="info-value">${fields.AI_Status || '—'}</span>
+                </div>
+            `;
+        }
+
+        function buildVersionsAndRender(fields) {
+            const sku = fields.SKU;
+            const folderUrl = fields.RAW_Folder_URL || '';
+            const folderId = fields.RAW_FolderID || '';
+            const regenCount = fields.AI_Regeneration_Count || 1;
+            
+            // Current AI photo links
+            const aiFrontLink = fields.AI_Front_Image_Link || '';
+            const aiBackLink = fields.AI_Back_Image_Link || '';
+            
+            // Build versions array
+            currentVersions = [];
+            for (let i = 1; i <= regenCount; i++) {
+                currentVersions.push({
+                    version: i,
+                    label: `v${i}`,
+                    isCurrent: i === regenCount,
+                    // For current version, use the stored links
+                    // For previous versions, we'll use placeholder (can't easily reconstruct)
+                    frontUrl: i === regenCount ? aiFrontLink : null,
+                    backUrl: i === regenCount ? aiBackLink : null
+                });
+            }
+            
+            // Select latest version by default
+            selectedVersion = currentVersions.length > 0 ? currentVersions[currentVersions.length - 1] : null;
+            
+            document.getElementById('viewing-version').textContent = selectedVersion ? selectedVersion.label : '—';
+            document.getElementById('total-versions').textContent = regenCount;
+            
+            renderPhotoSection(fields);
+        }
+
+        function renderPhotoSection(fields) {
+            const container = document.getElementById('photo-section');
+            const sku = fields.SKU;
+            
+            // RAW photo URLs (from Drive folder)
+            // These are constructed from the folder structure
+            const folderId = fields.RAW_FolderID || '';
+            
+            // For RAW photos, we need to list them or use known naming convention
+            // Since we can't list Drive from frontend, we'll use the thumbnail API with guessed file names
+            // This is a limitation - in production, these URLs should come from Airtable fields
+            
+            // Current AI photos
+            const aiFront = selectedVersion?.frontUrl || '';
+            const aiBack = selectedVersion?.backUrl || '';
+            
+            // Extract file IDs from Google Drive links if possible
+            const aiFrontId = extractDriveFileId(aiFront);
+            const aiBackId = extractDriveFileId(aiBack);
+            
+            // For RAW, we'd need stored links - let's check if they exist in fields
+            // If not, show placeholder
+            const rawFrontUrl = fields.RAW_Front_URL || '';
+            const rawBackUrl = fields.RAW_Back_URL || '';
+            const rawFrontId = extractDriveFileId(rawFrontUrl);
+            const rawBackId = extractDriveFileId(rawBackUrl);
+
+            container.innerHTML = `
+                <div class="comparison-grid">
+                    <!-- RAW Column -->
+                    <div class="comparison-column">
+                        <div class="column-header">
+                            <span class="column-title raw">◆ RAW Originali</span>
+                            <span class="column-badge">Input</span>
+                        </div>
+                        <div class="photo-pair">
+                            <div class="photo-slot">
+                                <span class="photo-slot-label front">Front</span>
+                                <div class="photo-image-container" onclick="openModal('${rawFrontId ? `https://drive.google.com/thumbnail?id=${rawFrontId}&sz=w1200` : ''}')">
+                                    ${rawFrontId 
+                                        ? `<img src="https://drive.google.com/thumbnail?id=${rawFrontId}&sz=w600" alt="RAW Front">` 
+                                        : `<div class="photo-placeholder">RAW non disponibile</div>`
+                                    }
+                                </div>
+                            </div>
+                            <div class="photo-slot">
+                                <span class="photo-slot-label back">Back</span>
+                                <div class="photo-image-container" onclick="openModal('${rawBackId ? `https://drive.google.com/thumbnail?id=${rawBackId}&sz=w1200` : ''}')">
+                                    ${rawBackId 
+                                        ? `<img src="https://drive.google.com/thumbnail?id=${rawBackId}&sz=w600" alt="RAW Back">` 
+                                        : `<div class="photo-placeholder">RAW non disponibile</div>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Column -->
+                    <div class="comparison-column">
+                        <div class="column-header">
+                            <span class="column-title ai">◆ AI Generated</span>
+                            <span class="column-badge">${selectedVersion?.label || 'v?'}</span>
+                        </div>
+                        <div class="photo-pair">
+                            <div class="photo-slot">
+                                <span class="photo-slot-label front">Front</span>
+                                <div class="photo-image-container" onclick="openModal('${aiFrontId ? `https://drive.google.com/thumbnail?id=${aiFrontId}&sz=w1200` : ''}')">
+                                    ${aiFrontId 
+                                        ? `<img src="https://drive.google.com/thumbnail?id=${aiFrontId}&sz=w600" alt="AI Front">` 
+                                        : `<div class="photo-placeholder">AI non disponibile</div>`
+                                    }
+                                </div>
+                            </div>
+                            <div class="photo-slot">
+                                <span class="photo-slot-label back">Back</span>
+                                <div class="photo-image-container" onclick="openModal('${aiBackId ? `https://drive.google.com/thumbnail?id=${aiBackId}&sz=w1200` : ''}')">
+                                    ${aiBackId 
+                                        ? `<img src="https://drive.google.com/thumbnail?id=${aiBackId}&sz=w600" alt="AI Back">` 
+                                        : `<div class="photo-placeholder">AI non disponibile</div>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Version History -->
+                <div class="version-section">
+                    <div class="version-header">
+                        <span class="version-title">↳ Storico Versioni</span>
+                        <span class="column-badge">${currentVersions.length} versioni</span>
+                    </div>
+                    ${renderVersionHistory(aiFrontId, aiBackId)}
+                </div>
+            `;
+        }
+
+        function renderVersionHistory(currentFrontId, currentBackId) {
+            if (currentVersions.length === 0) {
+                return '<div class="no-versions">Nessuna versione disponibile</div>';
+            }
+
+            let html = '<div class="version-grid">';
+            
+            currentVersions.forEach((v, index) => {
+                const isSelected = selectedVersion && selectedVersion.version === v.version;
+                const isCurrent = v.isCurrent;
+                
+                // For current version, use the actual IDs
+                // For older versions, show placeholder (we don't have their IDs stored)
+                const frontId = isCurrent ? currentFrontId : null;
+                const backId = isCurrent ? currentBackId : null;
+                
+                html += `
+                    <div class="version-card ${isSelected ? 'selected' : ''} ${isCurrent ? 'current' : ''}" 
+                         onclick="selectVersion(${v.version})" 
+                         data-version="${v.version}">
+                        <div class="version-card-header">
+                            <span class="version-number">${v.label}</span>
+                            ${isCurrent ? '<span class="version-tag current">Ultima</span>' : ''}
+                            ${isSelected && !isCurrent ? '<span class="version-tag selected">Selezionata</span>' : ''}
+                        </div>
+                        <div class="version-thumbs">
+                            <div class="version-thumb">
+                                ${frontId 
+                                    ? `<img src="https://drive.google.com/thumbnail?id=${frontId}&sz=w200" alt="Front">` 
+                                    : `<div class="photo-placeholder" style="position:absolute;top:0;left:0;width:100%;height:100%;">F</div>`
+                                }
+                            </div>
+                            <div class="version-thumb">
+                                ${backId 
+                                    ? `<img src="https://drive.google.com/thumbnail?id=${backId}&sz=w200" alt="Back">` 
+                                    : `<div class="photo-placeholder" style="position:absolute;top:0;left:0;width:100%;height:100%;">B</div>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            return html;
+        }
+
+        function selectVersion(versionNum) {
+            const version = currentVersions.find(v => v.version === versionNum);
+            if (version) {
+                selectedVersion = version;
+                document.getElementById('viewing-version').textContent = version.label;
+                
+                // Re-render to update selection
+                renderPhotoSection(currentRecord.fields);
+            }
+        }
+
+        function extractDriveFileId(url) {
+            if (!url) return null;
+            
+            // Handle various Google Drive URL formats
+            // Format 1: https://drive.google.com/file/d/FILE_ID/view
+            const match1 = url.match(/\/file\/d\/([^\/]+)/);
+            if (match1) return match1[1];
+            
+            // Format 2: https://drive.google.com/open?id=FILE_ID
+            const match2 = url.match(/[?&]id=([^&]+)/);
+            if (match2) return match2[1];
+            
+            // Format 3: https://drive.google.com/thumbnail?id=FILE_ID
+            const match3 = url.match(/thumbnail\?id=([^&]+)/);
+            if (match3) return match3[1];
+            
+            // Format 4: Direct file ID
+            if (url.match(/^[a-zA-Z0-9_-]{25,}$/)) return url;
+            
+            return null;
+        }
+
+        function toggleRegenOption(type) {
+            const checkbox = document.getElementById(`regen-${type}`);
+            const box = document.getElementById(`regen-${type}-box`);
+            
+            checkbox.checked = !checkbox.checked;
+            box.classList.toggle('checked', checkbox.checked);
+            
+            updateRegenButton();
+        }
+
+        function updateRegenButton() {
+            const frontChecked = document.getElementById('regen-front').checked;
+            const backChecked = document.getElementById('regen-back').checked;
+            const btn = document.getElementById('btn-regenerate');
+            
+            btn.disabled = !frontChecked && !backChecked;
+            
+            if (frontChecked && backChecked) {
+                btn.textContent = '↻ Rigenera Entrambe';
+            } else if (frontChecked) {
+                btn.textContent = '↻ Rigenera FRONT';
+            } else if (backChecked) {
+                btn.textContent = '↻ Rigenera BACK';
+            } else {
+                btn.textContent = '↻ Rigenera Selezionate';
+            }
+        }
+
+        async function approvePhotos() {
+            if (!currentRecord) return;
+            
+            const btn = document.getElementById('btn-approve');
+            btn.disabled = true;
+            btn.textContent = 'Approvazione...';
+
+            try {
+                // Update Airtable: Set AI_Quality_Check = APPROVED
+                await apiRequest(INVENTARIO_TABLE, {
+                    recordId: currentRecord.id,
+                    method: 'PATCH',
+                    body: {
+                        fields: {
+                            'AI_Quality_Check': 'APPROVED',
+                            'AI_Approved_Version': selectedVersion?.version || 1
+                        }
+                    }
+                });
+
+                // Update local state
+                const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
+                if (idx !== -1) {
+                    pendingRecords.splice(idx, 1);
+                }
+
+                stats.pending--;
+                stats.approved++;
+                updateStatsUI();
+
+                showToast(`${currentRecord.fields.SKU} approvato ✓`, 'success');
+                
+                btn.textContent = '✓ Approva Versione';
+                btn.disabled = false;
+                
+                loadNextProduct();
+
+            } catch (error) {
+                showToast(`Errore: ${error.message}`, 'error');
+                btn.disabled = false;
+                btn.textContent = '✓ Approva Versione';
+            }
+        }
+
+        async function triggerRegeneration() {
+            if (!currentRecord) return;
+            
+            const frontChecked = document.getElementById('regen-front').checked;
+            const backChecked = document.getElementById('regen-back').checked;
+            
+            if (!frontChecked && !backChecked) {
+                showToast('Seleziona almeno una foto da rigenerare', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-regenerate');
+            btn.disabled = true;
+            btn.textContent = 'Invio richiesta...';
+
+            try {
+                // Determine regeneration scope
+                let regenScope = '';
+                if (frontChecked && backChecked) {
+                    regenScope = 'BOTH';
+                } else if (frontChecked) {
+                    regenScope = 'FRONT';
+                } else {
+                    regenScope = 'BACK';
+                }
+
+                // Update Airtable: Trigger regeneration
+                // This sets AI_Regenerate_Trigger = TRUE which W3 will pick up
+                await apiRequest(INVENTARIO_TABLE, {
+                    recordId: currentRecord.id,
+                    method: 'PATCH',
+                    body: {
+                        fields: {
+                            'AI_Quality_Check': 'REJECTED',
+                            'AI_Regenerate_Trigger': true,
+                            'AI_Regen_Scope': regenScope,
+                            'Product_Status': 'RAW_PROCESSED'
+                        }
+                    }
+                });
+
+                // Update local state
+                const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
+                if (idx !== -1) {
+                    pendingRecords.splice(idx, 1);
+                }
+
+                stats.pending--;
+                stats.regenerated++;
+                updateStatsUI();
+
+                showToast(`${currentRecord.fields.SKU} → rigenerazione ${regenScope} richiesta`, 'info');
+                
+                btn.textContent = '↻ Rigenera Selezionate';
+                btn.disabled = true;
+                
+                loadNextProduct();
+
+            } catch (error) {
+                showToast(`Errore: ${error.message}`, 'error');
+                btn.disabled = false;
+                updateRegenButton();
+            }
+        }
+
+        async function skipProduct() {
+            if (!currentRecord) return;
+
+            // Just move to next without changing anything
+            const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
+            if (idx !== -1) {
+                // Move to end of queue
+                const skipped = pendingRecords.splice(idx, 1)[0];
+                pendingRecords.push(skipped);
+            }
+
+            showToast(`${currentRecord.fields.SKU} saltato`, 'info');
+            loadNextProduct();
+        }
+
+        function showLoading(message) {
+            document.getElementById('photo-section').innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">${message}</div>
+                </div>
+            `;
+        }
+
+        function showEmptyState() {
+            document.getElementById('current-sku').textContent = 'COMPLETATO';
+            document.getElementById('photo-section').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">✓</div>
+                    <h2 class="empty-title">QC Review Completata</h2>
+                    <p class="empty-text">Tutti i prodotti in coda sono stati verificati.</p>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            document.getElementById('photo-section').innerHTML = `
+                <div class="error-container">
+                    <h3 class="error-title">Errore</h3>
+                    <div class="error-message">${message}</div>
+                    <button class="btn-retry" onclick="loadPendingRecords()">Riprova</button>
+                </div>
+            `;
+        }
+
+        function openModal(url) {
+            if (!url) return;
+            document.getElementById('modal-img').src = url;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+            
+            switch(e.key) {
+                case 'Escape':
+                    closeModal();
+                    break;
+                case 'a':
+                case 'A':
+                    if (!document.getElementById('btn-approve').disabled) {
+                        approvePhotos();
+                    }
+                    break;
+                case 'r':
+                case 'R':
+                    if (!document.getElementById('btn-regenerate').disabled) {
+                        triggerRegeneration();
+                    }
+                    break;
+                case 'ArrowRight':
+                    skipProduct();
+                    break;
+                case 'f':
+                case 'F':
+                    toggleRegenOption('front');
+                    break;
+                case 'b':
+                case 'B':
+                    toggleRegenOption('back');
+                    break;
+            }
+            
+            // Number keys for version selection
+            if (e.key >= '1' && e.key <= '9') {
+                const versionNum = parseInt(e.key);
+                if (versionNum <= currentVersions.length) {
+                    selectVersion(versionNum);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
