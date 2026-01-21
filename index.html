@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DirtyTag — Label Verifier</title>
+    <title>DirtyTag — AI Photo QC Review</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,7 +12,6 @@
             --bg-primary: #0a0a0a;
             --bg-secondary: #111111;
             --bg-tertiary: #1a1a1a;
-            --bg-elevated: #222222;
             --border: #2a2a2a;
             --border-hover: #3a3a3a;
             --text-primary: #ffffff;
@@ -28,11 +27,13 @@
             --accent-orange-dim: rgba(245, 158, 11, 0.15);
             --accent-yellow: #eab308;
             --accent-yellow-dim: rgba(234, 179, 8, 0.15);
-            --accent-purple: #a855f7;
-            --accent-purple-dim: rgba(168, 85, 247, 0.15);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'JetBrains Mono', monospace;
@@ -75,12 +76,14 @@
             letter-spacing: -0.5px;
         }
 
-        .logo span { color: var(--accent-red); }
+        .logo span {
+            color: var(--accent-red);
+        }
 
         .module-badge {
-            background: var(--accent-purple-dim);
-            border: 1px solid var(--accent-purple);
-            color: var(--accent-purple);
+            background: var(--accent-red-dim);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
             padding: 4px 10px;
             font-size: 0.65rem;
             font-weight: 600;
@@ -88,59 +91,33 @@
             text-transform: uppercase;
         }
 
-        .search-box {
+        .sku-display {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .search-input {
+        .sku-label {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sku-value {
             background: var(--bg-primary);
             border: 1px solid var(--border);
-            padding: 8px 14px;
-            color: var(--text-primary);
-            font-family: inherit;
+            padding: 6px 14px;
             font-size: 0.9rem;
-            width: 200px;
-            transition: border-color 0.2s;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--accent-purple);
-        }
-
-        .search-input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .btn-search {
-            background: var(--accent-purple);
-            border: none;
-            padding: 8px 16px;
-            color: white;
-            font-family: inherit;
-            font-size: 0.75rem;
             font-weight: 600;
             letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-search:hover {
-            background: #9333ea;
-        }
-
-        .btn-search:disabled {
-            background: var(--bg-tertiary);
-            cursor: not-allowed;
+            color: var(--text-primary);
         }
 
         .header-right {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 24px;
         }
 
         .stats-row {
@@ -150,54 +127,46 @@
 
         .stat-item {
             text-align: center;
-            min-width: 70px;
         }
 
         .stat-value {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: 700;
+            color: var(--accent-red);
         }
 
         .stat-value.green { color: var(--accent-green); }
-        .stat-value.red { color: var(--accent-red); }
-        .stat-value.yellow { color: var(--accent-yellow); }
         .stat-value.blue { color: var(--accent-blue); }
+        .stat-value.yellow { color: var(--accent-yellow); }
 
         .stat-label {
-            font-size: 0.55rem;
+            font-size: 0.6rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        .btn-refresh {
-            background: transparent;
-            border: 1px solid var(--border);
-            padding: 8px 12px;
-            color: var(--text-secondary);
-            font-family: inherit;
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: all 0.2s;
+        .progress-container {
+            width: 200px;
         }
 
-        .btn-refresh:hover {
-            border-color: var(--border-hover);
-            color: var(--text-primary);
+        .progress-bar {
+            height: 4px;
+            background: var(--bg-tertiary);
+            overflow: hidden;
         }
 
-        .btn-settings {
-            background: transparent;
-            border: 1px solid var(--border);
-            padding: 8px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s;
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-orange));
+            transition: width 0.4s ease;
         }
 
-        .btn-settings:hover {
-            border-color: var(--border-hover);
-            color: var(--text-primary);
+        .progress-text {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 4px;
         }
 
         /* Login Panel */
@@ -256,12 +225,12 @@
 
         .form-input:focus {
             outline: none;
-            border-color: var(--accent-purple);
+            border-color: var(--accent-red);
         }
 
         .btn-primary {
             width: 100%;
-            background: var(--accent-purple);
+            background: var(--accent-red);
             border: none;
             padding: 14px 24px;
             color: white;
@@ -275,7 +244,12 @@
         }
 
         .btn-primary:hover {
-            background: #9333ea;
+            background: #c41a1f;
+        }
+
+        .btn-primary:disabled {
+            background: var(--bg-tertiary);
+            cursor: not-allowed;
         }
 
         /* Main App */
@@ -286,59 +260,29 @@
 
         .app-container {
             display: grid;
-            grid-template-columns: 1fr 380px;
+            grid-template-columns: 1fr 320px;
             min-height: calc(100vh - 60px);
         }
 
-        /* Photo Section */
+        /* Photo Comparison Section */
         .photo-section {
             padding: 24px;
             overflow-y: auto;
         }
 
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 40px;
-            text-align: center;
-        }
-
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-
-        .empty-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-secondary);
-        }
-
-        .empty-text {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        /* Photo Grid */
-        .photo-grid {
+        .comparison-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 24px;
             margin-bottom: 24px;
         }
 
-        .photo-card {
+        .comparison-column {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
-            overflow: hidden;
         }
 
-        .photo-card-header {
+        .column-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -347,26 +291,62 @@
             background: var(--bg-tertiary);
         }
 
-        .photo-card-title {
+        .column-title {
             font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        .photo-card-title.front { color: var(--accent-red); }
-        .photo-card-title.back { color: var(--accent-blue); }
+        .column-title.raw { color: var(--accent-blue); }
+        .column-title.ai { color: var(--accent-green); }
 
-        .photo-container {
+        .column-badge {
+            font-size: 0.6rem;
+            padding: 3px 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .photo-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+        }
+
+        .photo-slot {
+            background: var(--bg-primary);
+            position: relative;
+        }
+
+        .photo-slot-label {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 4px 8px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 10;
+        }
+
+        .photo-slot-label.front { color: var(--accent-red); }
+        .photo-slot-label.back { color: var(--text-secondary); }
+
+        .photo-image-container {
             position: relative;
             width: 100%;
             padding-top: 125%;
-            background: var(--bg-primary);
+            background: var(--bg-tertiary);
             cursor: pointer;
             overflow: hidden;
         }
 
-        .photo-container img {
+        .photo-image-container img {
             position: absolute;
             top: 0;
             left: 0;
@@ -376,7 +356,7 @@
             transition: transform 0.3s;
         }
 
-        .photo-container:hover img {
+        .photo-image-container:hover img {
             transform: scale(1.02);
         }
 
@@ -390,96 +370,118 @@
             align-items: center;
             justify-content: center;
             color: var(--text-muted);
-            font-size: 0.75rem;
+            font-size: 0.7rem;
         }
 
-        /* Action Buttons under photos */
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            padding: 20px;
+        /* Version History */
+        .version-section {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
-            margin-bottom: 24px;
         }
 
-        .action-btn {
-            flex: 1;
+        .version-header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 16px 20px;
-            font-family: inherit;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .version-title {
             font-size: 0.75rem;
             font-weight: 600;
-            letter-spacing: 0.5px;
             text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-orange);
+        }
+
+        .version-grid {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            overflow-x: auto;
+        }
+
+        .version-card {
+            flex: 0 0 180px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
             cursor: pointer;
             transition: all 0.2s;
-            border: 2px solid;
-            background: transparent;
         }
 
-        .action-btn.label-done {
+        .version-card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .version-card.selected {
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 20px var(--accent-orange-dim);
+        }
+
+        .version-card.current {
             border-color: var(--accent-green);
-            color: var(--accent-green);
+            box-shadow: 0 0 20px var(--accent-green-dim);
         }
 
-        .action-btn.label-done:hover,
-        .action-btn.label-done.active {
-            background: var(--accent-green);
-            color: white;
-        }
-
-        .action-btn.to-check {
-            border-color: var(--accent-yellow);
-            color: var(--accent-yellow);
-        }
-
-        .action-btn.to-check:hover,
-        .action-btn.to-check.active {
-            background: var(--accent-yellow);
-            color: black;
-        }
-
-        .action-btn.discard {
-            border-color: var(--accent-red);
-            color: var(--accent-red);
-        }
-
-        .action-btn.discard:hover,
-        .action-btn.discard.active {
-            background: var(--accent-red);
-            color: white;
-        }
-
-        .checkbox-indicator {
-            width: 20px;
-            height: 20px;
-            border: 2px solid currentColor;
+        .version-card-header {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: 700;
+            justify-content: space-between;
         }
 
-        .action-btn.active .checkbox-indicator {
-            background: white;
-            color: inherit;
+        .version-number {
+            font-size: 0.75rem;
+            font-weight: 600;
         }
 
-        .action-btn.label-done.active .checkbox-indicator {
+        .version-tag {
+            font-size: 0.55rem;
+            padding: 2px 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .version-tag.current {
+            background: var(--accent-green-dim);
             color: var(--accent-green);
         }
 
-        .action-btn.to-check.active .checkbox-indicator {
-            color: var(--accent-yellow);
+        .version-tag.selected {
+            background: var(--accent-orange-dim);
+            color: var(--accent-orange);
         }
 
-        .action-btn.discard.active .checkbox-indicator {
-            color: var(--accent-red);
+        .version-thumbs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+        }
+
+        .version-thumb {
+            background: var(--bg-tertiary);
+            padding-top: 75%;
+            position: relative;
+        }
+
+        .version-thumb img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .no-versions {
+            padding: 40px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
         }
 
         /* Controls Panel */
@@ -488,7 +490,6 @@
             border-left: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
         }
 
         .controls-header {
@@ -509,30 +510,6 @@
             color: var(--text-muted);
         }
 
-        .sku-display {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .sku-label {
-            color: var(--text-muted);
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .sku-value {
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            padding: 6px 14px;
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            color: var(--accent-purple);
-        }
-
         .controls-body {
             flex: 1;
             padding: 20px;
@@ -540,7 +517,7 @@
         }
 
         .control-section {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .control-label {
@@ -549,31 +526,8 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         }
 
-        .edit-toggle {
-            font-size: 0.6rem;
-            color: var(--accent-purple);
-            cursor: pointer;
-            padding: 2px 8px;
-            border: 1px solid var(--accent-purple);
-            background: transparent;
-            transition: all 0.2s;
-        }
-
-        .edit-toggle:hover {
-            background: var(--accent-purple-dim);
-        }
-
-        .edit-toggle.active {
-            background: var(--accent-purple);
-            color: white;
-        }
-
-        /* Info Grid */
         .info-grid {
             display: grid;
             gap: 8px;
@@ -582,8 +536,7 @@
         .info-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 10px 12px;
+            padding: 8px 12px;
             background: var(--bg-primary);
             border: 1px solid var(--border);
         }
@@ -595,102 +548,75 @@
 
         .info-value {
             color: var(--text-primary);
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 500;
-            text-align: right;
         }
 
-        .info-value.empty {
-            color: var(--text-muted);
-            font-style: italic;
-        }
-
-        /* Editable Fields */
-        .editable-field {
-            width: 100%;
-            padding: 10px 12px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            margin-bottom: 8px;
-        }
-
-        .editable-field label {
-            display: block;
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
-        }
-
-        .editable-field input,
-        .editable-field select {
-            width: 100%;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            padding: 8px 10px;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 0.8rem;
-            transition: border-color 0.2s;
-        }
-
-        .editable-field input:focus,
-        .editable-field select:focus {
-            outline: none;
-            border-color: var(--accent-purple);
-        }
-
-        .editable-field select {
-            cursor: pointer;
-        }
-
-        /* Color Input */
-        .color-input-group {
+        /* Regeneration Checkboxes */
+        .regen-options {
             display: flex;
+            flex-direction: column;
             gap: 8px;
+        }
+
+        .regen-checkbox {
+            display: flex;
             align-items: center;
-        }
-
-        .color-preview {
-            width: 32px;
-            height: 32px;
-            border: 1px solid var(--border);
-            cursor: pointer;
-        }
-
-        .color-text {
-            flex: 1;
-        }
-
-        /* Notes Section */
-        .notes-section {
-            margin-top: 16px;
-        }
-
-        .notes-textarea {
-            width: 100%;
-            min-height: 100px;
+            gap: 10px;
+            padding: 10px 14px;
             background: var(--bg-primary);
             border: 1px solid var(--border);
-            padding: 12px;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 0.8rem;
-            resize: vertical;
-            transition: border-color 0.2s;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .notes-textarea:focus {
-            outline: none;
-            border-color: var(--accent-purple);
+        .regen-checkbox:hover {
+            border-color: var(--border-hover);
         }
 
-        .notes-textarea::placeholder {
-            color: var(--text-muted);
+        .regen-checkbox.checked {
+            border-color: var(--accent-red);
+            background: var(--accent-red-dim);
         }
 
-        /* Footer Actions */
+        .regen-checkbox input {
+            display: none;
+        }
+
+        .checkbox-indicator {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .regen-checkbox.checked .checkbox-indicator {
+            border-color: var(--accent-red);
+            background: var(--accent-red);
+        }
+
+        .checkbox-indicator::after {
+            content: '✓';
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .regen-checkbox.checked .checkbox-indicator::after {
+            opacity: 1;
+        }
+
+        .checkbox-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Action Buttons */
         .controls-footer {
             padding: 20px;
             border-top: 1px solid var(--border);
@@ -699,9 +625,9 @@
             gap: 10px;
         }
 
-        .btn-save {
+        .btn-approve {
             width: 100%;
-            background: var(--accent-purple);
+            background: var(--accent-green);
             border: none;
             padding: 16px 24px;
             color: white;
@@ -714,17 +640,60 @@
             transition: all 0.2s;
         }
 
-        .btn-save:hover {
-            background: #9333ea;
+        .btn-approve:hover {
+            background: #00b85c;
         }
 
-        .btn-save:disabled {
+        .btn-approve:disabled {
             background: var(--bg-tertiary);
+            cursor: not-allowed;
+        }
+
+        .btn-regenerate {
+            width: 100%;
+            background: transparent;
+            border: 2px solid var(--accent-red);
+            padding: 14px 24px;
+            color: var(--accent-red);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-regenerate:hover {
+            background: var(--accent-red-dim);
+        }
+
+        .btn-regenerate:disabled {
+            border-color: var(--bg-tertiary);
             color: var(--text-muted);
             cursor: not-allowed;
         }
 
-        .btn-next {
+        .btn-defer {
+            width: 100%;
+            background: transparent;
+            border: 2px solid var(--accent-yellow);
+            padding: 14px 24px;
+            color: var(--accent-yellow);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-defer:hover {
+            background: var(--accent-yellow-dim);
+        }
+
+        .btn-skip {
             width: 100%;
             background: transparent;
             border: 1px solid var(--border);
@@ -739,34 +708,119 @@
             transition: all 0.2s;
         }
 
-        .btn-next:hover {
+        .btn-skip:hover {
             border-color: var(--border-hover);
             color: var(--text-primary);
         }
 
-        /* Keyboard Hints */
-        .keyboard-hints {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            padding: 12px 20px;
+        /* Deferred List Section */
+        .deferred-section {
             border-top: 1px solid var(--border);
+            max-height: 200px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .deferred-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: var(--bg-tertiary);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .deferred-header:hover {
             background: var(--bg-primary);
         }
 
-        .hint {
+        .deferred-title {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 0.6rem;
-            color: var(--text-muted);
+            gap: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-yellow);
         }
 
-        .hint kbd {
-            background: var(--bg-tertiary);
+        .deferred-count {
+            background: var(--accent-yellow-dim);
+            border: 1px solid var(--accent-yellow);
+            padding: 2px 8px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .deferred-toggle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        .deferred-section.expanded .deferred-toggle {
+            transform: rotate(180deg);
+        }
+
+        .deferred-list {
+            flex: 1;
+            overflow-y: auto;
+            display: none;
+            padding: 8px;
+            background: var(--bg-primary);
+        }
+
+        .deferred-section.expanded .deferred-list {
+            display: block;
+        }
+
+        .deferred-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            background: var(--bg-secondary);
             border: 1px solid var(--border);
-            padding: 2px 6px;
-            font-family: inherit;
+            font-size: 0.75rem;
+        }
+
+        .deferred-item-sku {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .deferred-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .deferred-item-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            transition: color 0.2s;
+        }
+
+        .deferred-item-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .deferred-item-btn.restore:hover {
+            color: var(--accent-green);
+        }
+
+        .deferred-empty {
+            text-align: center;
+            padding: 16px;
+            color: var(--text-muted);
+            font-size: 0.7rem;
         }
 
         /* Modal */
@@ -827,10 +881,25 @@
             opacity: 1;
         }
 
-        .toast.success { border-color: var(--accent-green); color: var(--accent-green); }
-        .toast.error { border-color: var(--accent-red); color: var(--accent-red); }
-        .toast.info { border-color: var(--accent-blue); color: var(--accent-blue); }
-        .toast.warning { border-color: var(--accent-yellow); color: var(--accent-yellow); }
+        .toast.success {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .toast.error {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .toast.info {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .toast.warning {
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
 
         /* Loading */
         .loading {
@@ -846,16 +915,105 @@
             width: 40px;
             height: 40px;
             border: 3px solid var(--border);
-            border-top-color: var(--accent-purple);
+            border-top-color: var(--accent-red);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
         .loading-text {
             color: var(--text-muted);
             font-size: 0.75rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 40px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .empty-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--accent-green);
+        }
+
+        .empty-text {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Keyboard Hints */
+        .keyboard-hints {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-primary);
+        }
+
+        .hint {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .hint kbd {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 2px 6px;
+            font-family: inherit;
+        }
+
+        /* Error */
+        .error-container {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .error-title {
+            color: var(--accent-red);
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+
+        .error-message {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: left;
+            overflow-x: auto;
+        }
+
+        .btn-retry {
+            background: var(--accent-red);
+            border: none;
+            padding: 12px 24px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -865,45 +1023,53 @@
         <div class="header-left">
             <div class="logo-section">
                 <div class="logo">DIRTY<span>TAG</span></div>
-                <div class="module-badge">Label Verifier</div>
+                <div class="module-badge">AI Photo QC</div>
             </div>
-            <div class="search-box" id="search-box" style="display: none;">
-                <input type="text" class="search-input" id="sku-search" placeholder="Cerca SKU...">
-                <button class="btn-search" id="btn-search">Cerca</button>
+            <div class="sku-display" id="sku-display" style="display: none;">
+                <span class="sku-label">SKU</span>
+                <span class="sku-value" id="current-sku">—</span>
             </div>
         </div>
         <div class="header-right" id="header-stats" style="display: none;">
             <div class="stats-row">
                 <div class="stat-item">
-                    <div class="stat-value green" id="stat-tagged">-</div>
-                    <div class="stat-label">Etichettati</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value yellow" id="stat-tocheck">-</div>
-                    <div class="stat-label">Da Rivedere</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value blue" id="stat-remaining">-</div>
+                    <div class="stat-value" id="stat-pending">0</div>
                     <div class="stat-label">Da Verificare</div>
                 </div>
+                <div class="stat-item">
+                    <div class="stat-value green" id="stat-approved">0</div>
+                    <div class="stat-label">Approvati</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value blue" id="stat-regen">0</div>
+                    <div class="stat-label">Rigenerati</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value yellow" id="stat-deferred">0</div>
+                    <div class="stat-label">Scartati</div>
+                </div>
             </div>
-            <button class="btn-refresh" id="btn-refresh" title="Aggiorna contatori">↻ Refresh</button>
-            <button class="btn-settings" id="btn-settings" title="Impostazioni">⚙</button>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="progress-text" id="progress-text">0% completato</div>
+            </div>
         </div>
     </header>
 
     <!-- Login Panel -->
     <div class="login-panel" id="login-panel">
         <div class="login-card">
-            <h1 class="login-title">Label Verifier</h1>
-            <p class="login-subtitle">Verifica articoli e applicazione label</p>
+            <h1 class="login-title">AI Photo QC Review</h1>
+            <p class="login-subtitle">Sistema di quality check per foto AI-generated</p>
             
             <div class="form-group">
                 <label class="form-label">Airtable API Key</label>
                 <input type="password" class="form-input" id="api-key" placeholder="pat...">
             </div>
             
-            <button class="btn-primary" id="btn-start">Avvia</button>
+            <button class="btn-primary" onclick="startApp()">Avvia Review</button>
         </div>
     </div>
 
@@ -912,154 +1078,97 @@
         <div class="app-container">
             <!-- Photo Section -->
             <div class="photo-section" id="photo-section">
-                <div class="empty-state" id="empty-state">
-                    <div class="empty-icon">🔍</div>
-                    <h2 class="empty-title">Cerca un articolo</h2>
-                    <p class="empty-text">Inserisci lo SKU nella barra di ricerca per verificare l'articolo</p>
-                </div>
+                <!-- Content loaded dynamically -->
             </div>
 
             <!-- Controls Panel -->
             <div class="controls-panel">
                 <div class="controls-header">
-                    <div class="controls-title">Dettagli Articolo</div>
-                    <div class="controls-subtitle">Verifica e modifica informazioni</div>
-                    <div class="sku-display" id="sku-display" style="display: none;">
-                        <span class="sku-label">SKU</span>
-                        <span class="sku-value" id="current-sku">—</span>
-                    </div>
+                    <div class="controls-title">Quality Check</div>
+                    <div class="controls-subtitle">Verifica e approva le foto AI</div>
                 </div>
 
-                <div class="controls-body" id="controls-body">
-                    <!-- Product Info (Read-only mode) -->
-                    <div id="info-readonly">
-                        <div class="control-section">
-                            <div class="control-label">
-                                Informazioni Prodotto
-                                <button class="edit-toggle" id="edit-toggle">Modifica</button>
+                <div class="controls-body">
+                    <div class="control-section">
+                        <div class="control-label">Informazioni Prodotto</div>
+                        <div class="info-grid" id="product-info">
+                            <!-- Loaded dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <div class="control-label">Versione Visualizzata</div>
+                        <div class="info-grid">
+                            <div class="info-row">
+                                <span class="info-key">Versione</span>
+                                <span class="info-value" id="viewing-version">v1</span>
                             </div>
-                            <div class="info-grid" id="product-info">
-                                <div class="info-row">
-                                    <span class="info-key">Categoria</span>
-                                    <span class="info-value" id="info-category">—</span>
-                                </div>
-                                <div class="info-row">
-                                    <span class="info-key">Sub-Categoria</span>
-                                    <span class="info-value" id="info-subcategory">—</span>
-                                </div>
-                                <div class="info-row">
-                                    <span class="info-key">Brand</span>
-                                    <span class="info-value" id="info-brand">—</span>
-                                </div>
-                                <div class="info-row">
-                                    <span class="info-key">Colore</span>
-                                    <span class="info-value" id="info-color">—</span>
-                                </div>
-                                <div class="info-row">
-                                    <span class="info-key">Taglia</span>
-                                    <span class="info-value" id="info-size">—</span>
-                                </div>
-                                <div class="info-row">
-                                    <span class="info-key">Genere</span>
-                                    <span class="info-value" id="info-gender">—</span>
-                                </div>
-                                <div class="info-row">
-                                    <span class="info-key">Condizione</span>
-                                    <span class="info-value" id="info-condition">—</span>
-                                </div>
+                            <div class="info-row">
+                                <span class="info-key">Generazioni Tot.</span>
+                                <span class="info-value" id="total-versions">1</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Editable Fields (Edit mode) -->
-                    <div id="info-editable" style="display: none;">
-                        <div class="control-section">
-                            <div class="control-label">
-                                Modifica Dettagli
-                                <button class="edit-toggle active" id="edit-close">Chiudi</button>
-                            </div>
-                            
-                            <div class="editable-field">
-                                <label>Categoria</label>
-                                <input type="text" id="edit-category" placeholder="Categoria...">
-                            </div>
-                            
-                            <div class="editable-field">
-                                <label>Sub-Categoria</label>
-                                <input type="text" id="edit-subcategory" placeholder="Sub-categoria...">
-                            </div>
-                            
-                            <div class="editable-field">
-                                <label>Brand</label>
-                                <input type="text" id="edit-brand" placeholder="Brand...">
-                            </div>
-                            
-                            <div class="editable-field">
-                                <label>Colore</label>
-                                <div class="color-input-group">
-                                    <input type="color" id="edit-color-picker" class="color-preview" value="#ffffff">
-                                    <input type="text" id="edit-color" class="color-text" placeholder="Es. Rosso, Blu...">
-                                </div>
-                            </div>
-                            
-                            <div class="editable-field">
-                                <label>Taglia</label>
-                                <input type="text" id="edit-size" placeholder="Es. M, L, 42...">
-                            </div>
-                            
-                            <div class="editable-field">
-                                <label>Genere</label>
-                                <select id="edit-gender">
-                                    <option value="">Seleziona...</option>
-                                    <option value="M">Uomo</option>
-                                    <option value="F">Donna</option>
-                                    <option value="U">Unisex</option>
-                                </select>
-                            </div>
-                            
-                            <div class="editable-field">
-                                <label>Condizione</label>
-                                <select id="edit-condition">
-                                    <option value="">Seleziona...</option>
-                                    <option value="Nuovo con etichette">Nuovo con etichette</option>
-                                    <option value="Nuovo senza etichette">Nuovo senza etichette</option>
-                                    <option value="Ottime condizioni">Ottime condizioni</option>
-                                    <option value="Buone condizioni">Buone condizioni</option>
-                                    <option value="Usato">Usato</option>
-                                </select>
-                            </div>
+                    <div class="control-section">
+                        <div class="control-label">Rigenerazione Selettiva</div>
+                        <div class="regen-options">
+                            <label class="regen-checkbox" id="regen-front-box" onclick="toggleRegenOption('front')">
+                                <input type="checkbox" id="regen-front">
+                                <span class="checkbox-indicator"></span>
+                                <span class="checkbox-label">Rigenera FRONT</span>
+                            </label>
+                            <label class="regen-checkbox" id="regen-back-box" onclick="toggleRegenOption('back')">
+                                <input type="checkbox" id="regen-back">
+                                <span class="checkbox-indicator"></span>
+                                <span class="checkbox-label">Rigenera BACK</span>
+                            </label>
                         </div>
-                    </div>
-
-                    <!-- Notes Section -->
-                    <div class="notes-section">
-                        <div class="control-label">Note Dettagli</div>
-                        <textarea class="notes-textarea" id="notes-input" placeholder="Inserisci note su macchie, difetti, errori database..."></textarea>
                     </div>
                 </div>
 
                 <div class="controls-footer">
-                    <button class="btn-save" id="btn-save" disabled>
-                        💾 Salva Modifiche
+                    <button class="btn-approve" id="btn-approve" onclick="approvePhotos()">
+                        ✓ Approva Versione
                     </button>
-                    <button class="btn-next" id="btn-clear">
-                        Nuova Ricerca →
+                    <button class="btn-regenerate" id="btn-regenerate" onclick="triggerRegeneration()" disabled>
+                        ↻ Rigenera Selezionate
+                    </button>
+                    <button class="btn-defer" id="btn-defer" onclick="deferProduct()">
+                        ⏸ Scarta per Check
+                    </button>
+                    <button class="btn-skip" onclick="skipProduct()">
+                        Salta Prodotto →
                     </button>
                 </div>
 
                 <div class="keyboard-hints">
-                    <div class="hint"><kbd>T</kbd> Tagged</div>
-                    <div class="hint"><kbd>C</kbd> To Check</div>
-                    <div class="hint"><kbd>X</kbd> Scarta</div>
-                    <div class="hint"><kbd>S</kbd> Salva</div>
-                    <div class="hint"><kbd>E</kbd> Modifica</div>
+                    <div class="hint"><kbd>A</kbd> Approva</div>
+                    <div class="hint"><kbd>R</kbd> Rigenera</div>
+                    <div class="hint"><kbd>D</kbd> Scarta</div>
+                    <div class="hint"><kbd>→</kbd> Salta</div>
+                    <div class="hint"><kbd>1-9</kbd> Versione</div>
+                </div>
+
+                <!-- Deferred List -->
+                <div class="deferred-section" id="deferred-section">
+                    <div class="deferred-header" onclick="toggleDeferredList()">
+                        <div class="deferred-title">
+                            <span>⏸ Check Secondario</span>
+                            <span class="deferred-count" id="deferred-count">0</span>
+                        </div>
+                        <span class="deferred-toggle">▼</span>
+                    </div>
+                    <div class="deferred-list" id="deferred-list">
+                        <div class="deferred-empty">Nessun SKU scartato</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Modal -->
-    <div class="modal" id="modal">
+    <div class="modal" id="modal" onclick="closeModal()">
         <span class="modal-close">×</span>
         <img id="modal-img" src="" alt="Full size">
     </div>
@@ -1068,62 +1177,38 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // Configuration
+        // Configuration - DirtyTag 3.0
         const BASE_ID = 'apptD8GSxN3vhhivI';
         const INVENTARIO_TABLE = 'tblddAcLcQAyk050u';
         
         let API_KEY = '';
+        let allRecords = [];
+        let pendingRecords = [];
+        let deferredRecords = []; // NEW: Lista SKU scartati per check secondario
         let currentRecord = null;
-        let currentAction = null; // 'tagged', 'tocheck', 'discard'
-        let editMode = false;
-        let hasChanges = false;
-        
-        let stats = {
-            tagged: 0,
-            tocheck: 0,
-            remaining: 0
-        };
+        let currentVersions = [];
+        let selectedVersion = null;
+        let stats = { pending: 0, approved: 0, regenerated: 0, deferred: 0 };
 
-        // ============================================
-        // INIT
-        // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing...');
-            
+        // Init
+        window.onload = function() {
             const savedKey = localStorage.getItem('dirtytag_api_key_v3');
             if (savedKey) {
                 document.getElementById('api-key').value = savedKey;
             }
-
-            // Bind event listeners
-            document.getElementById('btn-start').addEventListener('click', startApp);
-            document.getElementById('btn-search').addEventListener('click', function() {
-                console.log('Search button clicked');
-                searchSKU();
-            });
-            document.getElementById('sku-search').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    console.log('Enter pressed in search');
-                    searchSKU();
-                }
-            });
-            document.getElementById('btn-refresh').addEventListener('click', loadCounters);
-            document.getElementById('btn-settings').addEventListener('click', openSettings);
-            document.getElementById('edit-toggle').addEventListener('click', toggleEditMode);
-            document.getElementById('edit-close').addEventListener('click', toggleEditMode);
-            document.getElementById('btn-save').addEventListener('click', saveChanges);
-            document.getElementById('btn-clear').addEventListener('click', clearSearch);
-            document.getElementById('modal').addEventListener('click', closeModal);
             
-            // API key enter
-            document.getElementById('api-key').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') startApp();
-            });
-        });
+            // Load deferred list from localStorage
+            const savedDeferred = localStorage.getItem('dirtytag_deferred_list');
+            if (savedDeferred) {
+                try {
+                    deferredRecords = JSON.parse(savedDeferred);
+                    stats.deferred = deferredRecords.length;
+                } catch (e) {
+                    deferredRecords = [];
+                }
+            }
+        };
 
-        // ============================================
-        // APP START
-        // ============================================
         function startApp() {
             const key = document.getElementById('api-key').value.trim();
             if (!key) {
@@ -1135,18 +1220,12 @@
             
             document.getElementById('login-panel').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            document.getElementById('search-box').style.display = 'flex';
+            document.getElementById('sku-display').style.display = 'flex';
             document.getElementById('header-stats').style.display = 'flex';
             
-            // Load counters from Airtable
-            loadCounters();
-            
-            document.getElementById('sku-search').focus();
+            loadPendingRecords();
         }
 
-        // ============================================
-        // TOAST
-        // ============================================
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -1154,464 +1233,653 @@
             setTimeout(() => toast.className = 'toast', 2500);
         }
 
-        // ============================================
-        // LOAD COUNTERS FROM AIRTABLE
-        // ============================================
-        async function loadCounters() {
-            console.log('Loading counters...');
-            document.getElementById('stat-tagged').textContent = '...';
-            document.getElementById('stat-tocheck').textContent = '...';
-            document.getElementById('stat-remaining').textContent = '...';
+        async function apiRequest(table, options = {}) {
+            let url = `https://api.airtable.com/v0/${BASE_ID}/${table}`;
+            
+            if (options.recordId) {
+                url += `/${options.recordId}`;
+            }
+            
+            const params = new URLSearchParams();
+            if (options.filterByFormula) {
+                params.append('filterByFormula', options.filterByFormula);
+            }
+            if (options.sort) {
+                options.sort.forEach((s, i) => {
+                    params.append(`sort[${i}][field]`, s.field);
+                    params.append(`sort[${i}][direction]`, s.direction || 'asc');
+                });
+            }
+            if (options.offset) {
+                params.append('offset', options.offset);
+            }
+            
+            const queryString = params.toString();
+            if (queryString) {
+                url += `?${queryString}`;
+            }
+
+            const fetchOptions = {
+                headers: {
+                    'Authorization': `Bearer ${API_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            if (options.method) {
+                fetchOptions.method = options.method;
+            }
+            if (options.body) {
+                fetchOptions.body = JSON.stringify(options.body);
+            }
+
+            const response = await fetch(url, fetchOptions);
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status} - ${JSON.stringify(data.error || data)}`);
+            }
+
+            return data;
+        }
+
+        async function loadPendingRecords() {
+            showLoading('Caricamento prodotti in attesa di QC...');
 
             try {
-                // Count Tagged_Checkbox = true
-                const taggedCount = await countRecords("{Tagged_Checkbox} = TRUE()");
-                stats.tagged = taggedCount;
-                document.getElementById('stat-tagged').textContent = taggedCount;
+                allRecords = [];
+                let offset = null;
+                
+                // Filter: AI_Quality_Check = PENDING
+                const formula = "{AI_Quality_Check} = 'PENDING'";
+                
+                do {
+                    const data = await apiRequest(INVENTARIO_TABLE, { 
+                        filterByFormula: formula,
+                        sort: [{ field: 'SKU', direction: 'asc' }],
+                        offset 
+                    });
+                    allRecords = allRecords.concat(data.records);
+                    offset = data.offset;
+                } while (offset);
 
-                // Count To_Check = true
-                const tocheckCount = await countRecords("{To_Check} = TRUE()");
-                stats.tocheck = tocheckCount;
-                document.getElementById('stat-tocheck').textContent = tocheckCount;
-
-                // Count remaining: NOT Tagged and NOT To_Check and NOT Discarded
-                // Quelli da verificare = quelli senza Tagged_Checkbox e senza Product_Status = DISCARDED
-                const remainingCount = await countRecords("AND({Tagged_Checkbox} = FALSE(), OR({Product_Status} = '', {Product_Status} != 'DISCARDED'))");
-                stats.remaining = remainingCount;
-                document.getElementById('stat-remaining').textContent = remainingCount;
-
-                console.log('Counters loaded:', stats);
+                pendingRecords = allRecords;
+                stats.pending = pendingRecords.length;
+                updateStatsUI();
+                updateDeferredListUI();
+                
+                loadNextProduct();
 
             } catch (error) {
-                console.error('Error loading counters:', error);
-                showToast('Errore caricamento contatori', 'error');
-                document.getElementById('stat-tagged').textContent = '?';
-                document.getElementById('stat-tocheck').textContent = '?';
-                document.getElementById('stat-remaining').textContent = '?';
+                showError(error.message);
             }
         }
 
-        async function countRecords(filterFormula) {
-            let count = 0;
-            let offset = null;
+        function updateStatsUI() {
+            document.getElementById('stat-pending').textContent = stats.pending;
+            document.getElementById('stat-approved').textContent = stats.approved;
+            document.getElementById('stat-regen').textContent = stats.regenerated;
+            document.getElementById('stat-deferred').textContent = stats.deferred;
+            document.getElementById('deferred-count').textContent = stats.deferred;
             
-            do {
-                const params = new URLSearchParams();
-                params.append('filterByFormula', filterFormula);
-                params.append('fields[]', 'SKU'); // Minimal field to reduce payload
-                params.append('pageSize', '100');
-                if (offset) params.append('offset', offset);
-
-                const url = `https://api.airtable.com/v0/${BASE_ID}/${INVENTARIO_TABLE}?${params}`;
-                
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `Bearer ${API_KEY}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API Error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                count += data.records.length;
-                offset = data.offset;
-            } while (offset);
-
-            return count;
+            const total = stats.pending + stats.approved + stats.regenerated + stats.deferred;
+            const progress = total > 0 ? ((stats.approved + stats.regenerated) / total) * 100 : 0;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+            document.getElementById('progress-text').textContent = `${Math.round(progress)}% completato`;
         }
 
-        // ============================================
-        // SEARCH SKU
-        // ============================================
-        async function searchSKU() {
-            const skuInput = document.getElementById('sku-search').value.trim().toUpperCase();
-            console.log('Searching for:', skuInput);
-            
-            if (!skuInput) {
-                showToast('Inserisci uno SKU', 'error');
+        function loadNextProduct() {
+            // Reset UI
+            document.getElementById('regen-front').checked = false;
+            document.getElementById('regen-back').checked = false;
+            document.getElementById('regen-front-box').classList.remove('checked');
+            document.getElementById('regen-back-box').classList.remove('checked');
+            updateRegenButton();
+
+            if (pendingRecords.length === 0) {
+                showEmptyState();
                 return;
             }
 
-            // Show loading
-            document.getElementById('photo-section').innerHTML = `
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">Ricerca ${skuInput}...</div>
+            currentRecord = pendingRecords[0];
+            const fields = currentRecord.fields;
+            
+            document.getElementById('current-sku').textContent = fields.SKU || '—';
+            
+            // Load product info
+            renderProductInfo(fields);
+            
+            // Build version structure and render photos
+            buildVersionsAndRender(fields);
+        }
+
+        function renderProductInfo(fields) {
+            const container = document.getElementById('product-info');
+            container.innerHTML = `
+                <div class="info-row">
+                    <span class="info-key">Brand</span>
+                    <span class="info-value">${fields.Brand || '—'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-key">Categoria</span>
+                    <span class="info-value">${fields.Category || '—'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-key">AI Mode</span>
+                    <span class="info-value">${fields.AI_Mode_Selected || 'MANI'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-key">Status</span>
+                    <span class="info-value">${fields.AI_Status || '—'}</span>
                 </div>
             `;
+        }
 
-            try {
-                const params = new URLSearchParams();
-                params.append('filterByFormula', `{SKU}='${skuInput}'`);
-
-                const url = `https://api.airtable.com/v0/${BASE_ID}/${INVENTARIO_TABLE}?${params}`;
-                console.log('Fetching:', url);
-                
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `Bearer ${API_KEY}`,
-                        'Content-Type': 'application/json'
-                    }
+        function buildVersionsAndRender(fields) {
+            const sku = fields.SKU;
+            const folderUrl = fields.RAW_Folder_URL || '';
+            const folderId = fields.RAW_FolderID || '';
+            const regenCount = fields.AI_Regeneration_Count || 1;
+            
+            // Current AI photo links
+            const aiFrontLink = fields.AI_Front_Image_Link || '';
+            const aiBackLink = fields.AI_Back_Image_Link || '';
+            
+            // Build versions array
+            currentVersions = [];
+            for (let i = 1; i <= regenCount; i++) {
+                currentVersions.push({
+                    version: i,
+                    label: `v${i}`,
+                    isCurrent: i === regenCount,
+                    frontUrl: i === regenCount ? aiFrontLink : null,
+                    backUrl: i === regenCount ? aiBackLink : null
                 });
+            }
+            
+            // Select latest version by default
+            selectedVersion = currentVersions.length > 0 ? currentVersions[currentVersions.length - 1] : null;
+            
+            document.getElementById('viewing-version').textContent = selectedVersion ? selectedVersion.label : '—';
+            document.getElementById('total-versions').textContent = regenCount;
+            
+            renderPhotoSection(fields);
+        }
 
-                if (!response.ok) {
-                    throw new Error(`API Error: ${response.status}`);
-                }
+        function renderPhotoSection(fields) {
+            const container = document.getElementById('photo-section');
+            const sku = fields.SKU;
+            
+            const folderId = fields.RAW_FolderID || '';
+            
+            // Current AI photos
+            const aiFront = selectedVersion?.frontUrl || '';
+            const aiBack = selectedVersion?.backUrl || '';
+            
+            // Extract file IDs from Google Drive links if possible
+            const aiFrontId = extractDriveFileId(aiFront);
+            const aiBackId = extractDriveFileId(aiBack);
+            
+            const rawFrontUrl = fields.RAW_Front_URL || '';
+            const rawBackUrl = fields.RAW_Back_URL || '';
+            const rawFrontId = extractDriveFileId(rawFrontUrl);
+            const rawBackId = extractDriveFileId(rawBackUrl);
 
-                const data = await response.json();
-                console.log('Response:', data);
+            container.innerHTML = `
+                <div class="comparison-grid">
+                    <!-- RAW Column -->
+                    <div class="comparison-column">
+                        <div class="column-header">
+                            <span class="column-title raw">◆ RAW Originali</span>
+                            <span class="column-badge">Input</span>
+                        </div>
+                        <div class="photo-pair">
+                            <div class="photo-slot">
+                                <span class="photo-slot-label front">Front</span>
+                                <div class="photo-image-container" onclick="openModal('${rawFrontId ? `https://drive.google.com/thumbnail?id=${rawFrontId}&sz=w1200` : ''}')">
+                                    ${rawFrontId 
+                                        ? `<img src="https://drive.google.com/thumbnail?id=${rawFrontId}&sz=w600" alt="RAW Front">` 
+                                        : `<div class="photo-placeholder">RAW non disponibile</div>`
+                                    }
+                                </div>
+                            </div>
+                            <div class="photo-slot">
+                                <span class="photo-slot-label back">Back</span>
+                                <div class="photo-image-container" onclick="openModal('${rawBackId ? `https://drive.google.com/thumbnail?id=${rawBackId}&sz=w1200` : ''}')">
+                                    ${rawBackId 
+                                        ? `<img src="https://drive.google.com/thumbnail?id=${rawBackId}&sz=w600" alt="RAW Back">` 
+                                        : `<div class="photo-placeholder">RAW non disponibile</div>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                if (!data.records || data.records.length === 0) {
-                    showEmptyResult(skuInput);
-                    return;
-                }
+                    <!-- AI Column -->
+                    <div class="comparison-column">
+                        <div class="column-header">
+                            <span class="column-title ai">◆ AI Generated</span>
+                            <span class="column-badge">${selectedVersion?.label || 'v?'}</span>
+                        </div>
+                        <div class="photo-pair">
+                            <div class="photo-slot">
+                                <span class="photo-slot-label front">Front</span>
+                                <div class="photo-image-container" onclick="openModal('${aiFrontId ? `https://drive.google.com/thumbnail?id=${aiFrontId}&sz=w1200` : ''}')">
+                                    ${aiFrontId 
+                                        ? `<img src="https://drive.google.com/thumbnail?id=${aiFrontId}&sz=w600" alt="AI Front">` 
+                                        : `<div class="photo-placeholder">AI non disponibile</div>`
+                                    }
+                                </div>
+                            </div>
+                            <div class="photo-slot">
+                                <span class="photo-slot-label back">Back</span>
+                                <div class="photo-image-container" onclick="openModal('${aiBackId ? `https://drive.google.com/thumbnail?id=${aiBackId}&sz=w1200` : ''}')">
+                                    ${aiBackId 
+                                        ? `<img src="https://drive.google.com/thumbnail?id=${aiBackId}&sz=w600" alt="AI Back">` 
+                                        : `<div class="photo-placeholder">AI non disponibile</div>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                currentRecord = data.records[0];
-                renderProduct(currentRecord);
+                <!-- Version History -->
+                <div class="version-section">
+                    <div class="version-header">
+                        <span class="version-title">↳ Storico Versioni</span>
+                        <span class="column-badge">${currentVersions.length} versioni</span>
+                    </div>
+                    ${renderVersionHistory(aiFrontId, aiBackId)}
+                </div>
+            `;
+        }
 
-            } catch (error) {
-                console.error('Search error:', error);
-                showToast(`Errore: ${error.message}`, 'error');
-                showEmptyState();
+        function renderVersionHistory(currentFrontId, currentBackId) {
+            if (currentVersions.length === 0) {
+                return '<div class="no-versions">Nessuna versione disponibile</div>';
+            }
+
+            let html = '<div class="version-grid">';
+            
+            currentVersions.forEach((v, index) => {
+                const isSelected = selectedVersion && selectedVersion.version === v.version;
+                const isCurrent = v.isCurrent;
+                
+                const frontId = isCurrent ? currentFrontId : null;
+                const backId = isCurrent ? currentBackId : null;
+                
+                html += `
+                    <div class="version-card ${isSelected ? 'selected' : ''} ${isCurrent ? 'current' : ''}" 
+                         onclick="selectVersion(${v.version})" 
+                         data-version="${v.version}">
+                        <div class="version-card-header">
+                            <span class="version-number">${v.label}</span>
+                            ${isCurrent ? '<span class="version-tag current">Ultima</span>' : ''}
+                            ${isSelected && !isCurrent ? '<span class="version-tag selected">Selezionata</span>' : ''}
+                        </div>
+                        <div class="version-thumbs">
+                            <div class="version-thumb">
+                                ${frontId 
+                                    ? `<img src="https://drive.google.com/thumbnail?id=${frontId}&sz=w200" alt="Front">` 
+                                    : `<div class="photo-placeholder" style="position:absolute;top:0;left:0;width:100%;height:100%;">F</div>`
+                                }
+                            </div>
+                            <div class="version-thumb">
+                                ${backId 
+                                    ? `<img src="https://drive.google.com/thumbnail?id=${backId}&sz=w200" alt="Back">` 
+                                    : `<div class="photo-placeholder" style="position:absolute;top:0;left:0;width:100%;height:100%;">B</div>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            return html;
+        }
+
+        function selectVersion(versionNum) {
+            const version = currentVersions.find(v => v.version === versionNum);
+            if (version) {
+                selectedVersion = version;
+                document.getElementById('viewing-version').textContent = version.label;
+                renderPhotoSection(currentRecord.fields);
             }
         }
 
-        function showEmptyResult(sku) {
+        function extractDriveFileId(url) {
+            if (!url) return null;
+            
+            const match1 = url.match(/\/file\/d\/([^\/]+)/);
+            if (match1) return match1[1];
+            
+            const match2 = url.match(/[?&]id=([^&]+)/);
+            if (match2) return match2[1];
+            
+            const match3 = url.match(/thumbnail\?id=([^&]+)/);
+            if (match3) return match3[1];
+            
+            if (url.match(/^[a-zA-Z0-9_-]{25,}$/)) return url;
+            
+            return null;
+        }
+
+        function toggleRegenOption(type) {
+            const checkbox = document.getElementById(`regen-${type}`);
+            const box = document.getElementById(`regen-${type}-box`);
+            
+            checkbox.checked = !checkbox.checked;
+            box.classList.toggle('checked', checkbox.checked);
+            
+            updateRegenButton();
+        }
+
+        function updateRegenButton() {
+            const frontChecked = document.getElementById('regen-front').checked;
+            const backChecked = document.getElementById('regen-back').checked;
+            const btn = document.getElementById('btn-regenerate');
+            
+            btn.disabled = !frontChecked && !backChecked;
+            
+            if (frontChecked && backChecked) {
+                btn.textContent = '↻ Rigenera Entrambe';
+            } else if (frontChecked) {
+                btn.textContent = '↻ Rigenera FRONT';
+            } else if (backChecked) {
+                btn.textContent = '↻ Rigenera BACK';
+            } else {
+                btn.textContent = '↻ Rigenera Selezionate';
+            }
+        }
+
+        async function approvePhotos() {
+            if (!currentRecord) return;
+            
+            const btn = document.getElementById('btn-approve');
+            btn.disabled = true;
+            btn.textContent = 'Approvazione...';
+
+            try {
+                await apiRequest(INVENTARIO_TABLE, {
+                    recordId: currentRecord.id,
+                    method: 'PATCH',
+                    body: {
+                        fields: {
+                            'AI_Quality_Check': 'APPROVED',
+                            'AI_Approved_Version': selectedVersion?.version || 1
+                        }
+                    }
+                });
+
+                const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
+                if (idx !== -1) {
+                    pendingRecords.splice(idx, 1);
+                }
+
+                stats.pending--;
+                stats.approved++;
+                updateStatsUI();
+
+                showToast(`${currentRecord.fields.SKU} approvato ✓`, 'success');
+                
+                btn.textContent = '✓ Approva Versione';
+                btn.disabled = false;
+                
+                loadNextProduct();
+
+            } catch (error) {
+                showToast(`Errore: ${error.message}`, 'error');
+                btn.disabled = false;
+                btn.textContent = '✓ Approva Versione';
+            }
+        }
+
+        async function triggerRegeneration() {
+            if (!currentRecord) return;
+            
+            const frontChecked = document.getElementById('regen-front').checked;
+            const backChecked = document.getElementById('regen-back').checked;
+            
+            if (!frontChecked && !backChecked) {
+                showToast('Seleziona almeno una foto da rigenerare', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-regenerate');
+            btn.disabled = true;
+            btn.textContent = 'Invio richiesta...';
+
+            try {
+                let regenScope = '';
+                if (frontChecked && backChecked) {
+                    regenScope = 'BOTH';
+                } else if (frontChecked) {
+                    regenScope = 'FRONT';
+                } else {
+                    regenScope = 'BACK';
+                }
+
+                await apiRequest(INVENTARIO_TABLE, {
+                    recordId: currentRecord.id,
+                    method: 'PATCH',
+                    body: {
+                        fields: {
+                            'AI_Quality_Check': 'REJECTED',
+                            'AI_Regenerate_Trigger': true,
+                            'AI_Regen_Scope': regenScope,
+                            'Product_Status': 'RAW_PROCESSED'
+                        }
+                    }
+                });
+
+                const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
+                if (idx !== -1) {
+                    pendingRecords.splice(idx, 1);
+                }
+
+                stats.pending--;
+                stats.regenerated++;
+                updateStatsUI();
+
+                showToast(`${currentRecord.fields.SKU} → rigenerazione ${regenScope} richiesta`, 'info');
+                
+                btn.textContent = '↻ Rigenera Selezionate';
+                btn.disabled = true;
+                
+                loadNextProduct();
+
+            } catch (error) {
+                showToast(`Errore: ${error.message}`, 'error');
+                btn.disabled = false;
+                updateRegenButton();
+            }
+        }
+
+        // =====================================================
+        // DEFER PRODUCT - Scarta per Check Secondario
+        // =====================================================
+        async function deferProduct() {
+            if (!currentRecord) return;
+            
+            const btn = document.getElementById('btn-defer');
+            btn.disabled = true;
+            btn.textContent = 'Scarto in corso...';
+
+            try {
+                // Update Airtable: Set AI_Quality_Check = DEFERRED
+                await apiRequest(INVENTARIO_TABLE, {
+                    recordId: currentRecord.id,
+                    method: 'PATCH',
+                    body: {
+                        fields: {
+                            'AI_Quality_Check': 'DEFERRED'
+                        }
+                    }
+                });
+
+                // Add to deferred list
+                const deferredItem = {
+                    id: currentRecord.id,
+                    sku: currentRecord.fields.SKU,
+                    brand: currentRecord.fields.Brand || '—',
+                    timestamp: new Date().toISOString()
+                };
+                deferredRecords.push(deferredItem);
+                
+                // Save to localStorage
+                localStorage.setItem('dirtytag_deferred_list', JSON.stringify(deferredRecords));
+
+                // Remove from pending
+                const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
+                if (idx !== -1) {
+                    pendingRecords.splice(idx, 1);
+                }
+
+                stats.pending--;
+                stats.deferred++;
+                updateStatsUI();
+                updateDeferredListUI();
+
+                showToast(`${currentRecord.fields.SKU} scartato per check secondario ⏸`, 'warning');
+                
+                btn.textContent = '⏸ Scarta per Check';
+                btn.disabled = false;
+                
+                loadNextProduct();
+
+            } catch (error) {
+                showToast(`Errore: ${error.message}`, 'error');
+                btn.disabled = false;
+                btn.textContent = '⏸ Scarta per Check';
+            }
+        }
+
+        // Restore deferred product back to PENDING
+        async function restoreDeferredProduct(recordId, sku) {
+            try {
+                await apiRequest(INVENTARIO_TABLE, {
+                    recordId: recordId,
+                    method: 'PATCH',
+                    body: {
+                        fields: {
+                            'AI_Quality_Check': 'PENDING'
+                        }
+                    }
+                });
+
+                // Remove from deferred list
+                const idx = deferredRecords.findIndex(r => r.id === recordId);
+                if (idx !== -1) {
+                    deferredRecords.splice(idx, 1);
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('dirtytag_deferred_list', JSON.stringify(deferredRecords));
+
+                stats.deferred--;
+                stats.pending++;
+                updateStatsUI();
+                updateDeferredListUI();
+
+                showToast(`${sku} ripristinato in coda ↺`, 'success');
+                
+                // Reload to include restored item
+                loadPendingRecords();
+
+            } catch (error) {
+                showToast(`Errore ripristino: ${error.message}`, 'error');
+            }
+        }
+
+        // Toggle deferred list visibility
+        function toggleDeferredList() {
+            const section = document.getElementById('deferred-section');
+            section.classList.toggle('expanded');
+        }
+
+        // Update deferred list UI
+        function updateDeferredListUI() {
+            const container = document.getElementById('deferred-list');
+            
+            if (deferredRecords.length === 0) {
+                container.innerHTML = '<div class="deferred-empty">Nessun SKU scartato</div>';
+                return;
+            }
+
+            let html = '';
+            deferredRecords.forEach(item => {
+                html += `
+                    <div class="deferred-item">
+                        <div>
+                            <span class="deferred-item-sku">${item.sku}</span>
+                            <span style="color: var(--text-muted); font-size: 0.65rem; margin-left: 8px;">${item.brand}</span>
+                        </div>
+                        <div class="deferred-item-actions">
+                            <button class="deferred-item-btn restore" onclick="restoreDeferredProduct('${item.id}', '${item.sku}')" title="Ripristina in coda">
+                                ↺ Ripristina
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function skipProduct() {
+            if (!currentRecord) return;
+
+            const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
+            if (idx !== -1) {
+                const skipped = pendingRecords.splice(idx, 1)[0];
+                pendingRecords.push(skipped);
+            }
+
+            showToast(`${currentRecord.fields.SKU} saltato`, 'info');
+            loadNextProduct();
+        }
+
+        function showLoading(message) {
             document.getElementById('photo-section').innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">❌</div>
-                    <h2 class="empty-title">SKU non trovato</h2>
-                    <p class="empty-text">"${sku}" non esiste nel database</p>
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">${message}</div>
                 </div>
             `;
         }
 
         function showEmptyState() {
+            document.getElementById('current-sku').textContent = 'COMPLETATO';
+            
+            // Check if there are deferred items
+            const deferredMsg = stats.deferred > 0 
+                ? `<p class="empty-text" style="margin-top: 12px; color: var(--accent-yellow);">Hai ${stats.deferred} SKU da verificare nel check secondario.</p>`
+                : '';
+            
             document.getElementById('photo-section').innerHTML = `
-                <div class="empty-state" id="empty-state">
-                    <div class="empty-icon">🔍</div>
-                    <h2 class="empty-title">Cerca un articolo</h2>
-                    <p class="empty-text">Inserisci lo SKU nella barra di ricerca per verificare l'articolo</p>
+                <div class="empty-state">
+                    <div class="empty-icon">✓</div>
+                    <h2 class="empty-title">QC Review Completata</h2>
+                    <p class="empty-text">Tutti i prodotti in coda sono stati verificati.</p>
+                    ${deferredMsg}
                 </div>
             `;
         }
 
-        // ============================================
-        // RENDER PRODUCT
-        // ============================================
-        function renderProduct(record) {
-            const fields = record.fields;
-            console.log('Rendering product:', fields.SKU, fields);
-            
-            // Reset state
-            currentAction = null;
-            hasChanges = false;
-            editMode = false;
-            document.getElementById('btn-save').disabled = true;
-            document.getElementById('info-readonly').style.display = 'block';
-            document.getElementById('info-editable').style.display = 'none';
-
-            // Build photo section
+        function showError(message) {
             document.getElementById('photo-section').innerHTML = `
-                <div id="product-content">
-                    <div class="photo-grid">
-                        <div class="photo-card">
-                            <div class="photo-card-header">
-                                <span class="photo-card-title front">◆ FRONT</span>
-                            </div>
-                            <div class="photo-container" id="photo-front">
-                                ${renderPhoto(fields.AI_Front_Image_Link || fields.rawID_FRONT, 'front')}
-                            </div>
-                        </div>
-                        <div class="photo-card">
-                            <div class="photo-card-header">
-                                <span class="photo-card-title back">◆ BACK</span>
-                            </div>
-                            <div class="photo-container" id="photo-back">
-                                ${renderPhoto(fields.AI_Back_Image_Link || fields.rawID_BACK, 'back')}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="action-buttons">
-                        <button class="action-btn label-done" id="btn-tagged">
-                            <span class="checkbox-indicator">✓</span>
-                            <span>Label Inserita</span>
-                        </button>
-                        <button class="action-btn to-check" id="btn-tocheck">
-                            <span class="checkbox-indicator">?</span>
-                            <span>Da Rivedere</span>
-                        </button>
-                        <button class="action-btn discard" id="btn-discard">
-                            <span class="checkbox-indicator">✕</span>
-                            <span>Da Scartare</span>
-                        </button>
-                    </div>
+                <div class="error-container">
+                    <h3 class="error-title">Errore</h3>
+                    <div class="error-message">${message}</div>
+                    <button class="btn-retry" onclick="loadPendingRecords()">Riprova</button>
                 </div>
             `;
-
-            // Bind action button events
-            document.getElementById('btn-tagged').addEventListener('click', () => toggleAction('tagged'));
-            document.getElementById('btn-tocheck').addEventListener('click', () => toggleAction('tocheck'));
-            document.getElementById('btn-discard').addEventListener('click', () => toggleAction('discard'));
-            
-            // Bind photo click for modal
-            document.getElementById('photo-front').addEventListener('click', () => openModalPhoto('front'));
-            document.getElementById('photo-back').addEventListener('click', () => openModalPhoto('back'));
-
-            // Update SKU display
-            document.getElementById('sku-display').style.display = 'flex';
-            document.getElementById('current-sku').textContent = fields.SKU || '—';
-
-            // Update info fields
-            document.getElementById('info-category').textContent = fields.Category || '—';
-            document.getElementById('info-subcategory').textContent = fields['Sub-Category'] || '—';
-            document.getElementById('info-brand').textContent = fields.Brand_TXT || fields.Brand || '—';
-            document.getElementById('info-color').textContent = formatColors(fields.Colors) || '—';
-            document.getElementById('info-size').textContent = fields['Size (INT)'] || '—';
-            document.getElementById('info-gender').textContent = formatGender(fields.gender) || '—';
-            document.getElementById('info-condition').textContent = fields.Condizione || '—';
-
-            // Populate editable fields
-            document.getElementById('edit-category').value = fields.Category || '';
-            document.getElementById('edit-subcategory').value = fields['Sub-Category'] || '';
-            document.getElementById('edit-brand').value = fields.Brand_TXT || fields.Brand || '';
-            document.getElementById('edit-color').value = formatColors(fields.Colors) || '';
-            document.getElementById('edit-size').value = fields['Size (INT)'] || '';
-            document.getElementById('edit-gender').value = fields.gender || '';
-            document.getElementById('edit-condition').value = fields.Condizione || '';
-
-            // Notes
-            document.getElementById('notes-input').value = fields['Note Prodotto'] || '';
-
-            // Check existing status from Airtable
-            if (fields.Tagged_Checkbox === true) {
-                toggleAction('tagged', true);
-            } else if (fields.To_Check === true) {
-                toggleAction('tocheck', true);
-            } else if (fields.Product_Status === 'DISCARDED') {
-                toggleAction('discard', true);
-            }
         }
 
-        function renderPhoto(urlOrId, type) {
-            if (!urlOrId) {
-                return `<div class="photo-placeholder">Nessuna foto ${type}</div>`;
-            }
-            
-            let imgUrl = urlOrId;
-            
-            // If it's a Drive file ID
-            if (!urlOrId.startsWith('http')) {
-                imgUrl = `https://drive.google.com/thumbnail?id=${urlOrId}&sz=w600`;
-            } else {
-                // Extract file ID from Drive URL
-                const match = urlOrId.match(/\/d\/([^\/]+)/);
-                if (match) {
-                    imgUrl = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w600`;
-                }
-            }
-            
-            return `<img src="${imgUrl}" alt="${type}" onerror="this.parentElement.innerHTML='<div class=\\'photo-placeholder\\'>Errore caricamento</div>'">`;
-        }
-
-        function formatColors(colors) {
-            if (!colors) return null;
-            if (Array.isArray(colors)) return colors.join(', ');
-            return colors;
-        }
-
-        function formatGender(gender) {
-            const map = { 'M': 'Uomo', 'F': 'Donna', 'U': 'Unisex' };
-            return map[gender] || gender;
-        }
-
-        // ============================================
-        // ACTION BUTTONS
-        // ============================================
-        function toggleAction(action, silent = false) {
-            const btnMap = {
-                'tagged': 'btn-tagged',
-                'tocheck': 'btn-tocheck',
-                'discard': 'btn-discard'
-            };
-
-            // Deselect all
-            Object.values(btnMap).forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.remove('active');
-            });
-
-            if (currentAction === action) {
-                currentAction = null;
-            } else {
-                currentAction = action;
-                const btn = document.getElementById(btnMap[action]);
-                if (btn) btn.classList.add('active');
-            }
-
-            hasChanges = true;
-            document.getElementById('btn-save').disabled = false;
-
-            if (!silent && currentAction) {
-                const msgs = {
-                    'tagged': 'Label inserita ✓',
-                    'tocheck': 'Segnato da rivedere',
-                    'discard': 'Articolo da scartare'
-                };
-                showToast(msgs[currentAction], currentAction === 'tagged' ? 'success' : currentAction === 'discard' ? 'error' : 'warning');
-            }
-        }
-
-        // ============================================
-        // EDIT MODE
-        // ============================================
-        function toggleEditMode() {
-            editMode = !editMode;
-            document.getElementById('info-readonly').style.display = editMode ? 'none' : 'block';
-            document.getElementById('info-editable').style.display = editMode ? 'block' : 'none';
-            
-            if (editMode) {
-                hasChanges = true;
-                document.getElementById('btn-save').disabled = false;
-            }
-        }
-
-        // ============================================
-        // SAVE CHANGES
-        // ============================================
-        async function saveChanges() {
-            if (!currentRecord) return;
-            
-            const btn = document.getElementById('btn-save');
-            btn.disabled = true;
-            btn.textContent = 'Salvataggio...';
-
-            try {
-                const updateFields = {};
-                
-                // Set checkbox fields based on action
-                if (currentAction === 'tagged') {
-                    updateFields['Tagged_Checkbox'] = true;
-                    updateFields['To_Check'] = false;
-                } else if (currentAction === 'tocheck') {
-                    updateFields['To_Check'] = true;
-                    updateFields['Tagged_Checkbox'] = false;
-                } else if (currentAction === 'discard') {
-                    updateFields['Product_Status'] = 'DISCARDED';
-                    updateFields['Tagged_Checkbox'] = false;
-                    updateFields['To_Check'] = false;
-                }
-
-                // Get editable field values if in edit mode
-                if (editMode) {
-                    const category = document.getElementById('edit-category').value.trim();
-                    const subcategory = document.getElementById('edit-subcategory').value.trim();
-                    const brand = document.getElementById('edit-brand').value.trim();
-                    const color = document.getElementById('edit-color').value.trim();
-                    const size = document.getElementById('edit-size').value.trim();
-                    const gender = document.getElementById('edit-gender').value;
-                    const condition = document.getElementById('edit-condition').value;
-
-                    if (category) updateFields['Category'] = category;
-                    if (subcategory) updateFields['Sub-Category'] = subcategory;
-                    if (brand) updateFields['Brand_TXT'] = brand;
-                    if (color) updateFields['Colors'] = color;
-                    if (size) updateFields['Size (INT)'] = size;
-                    if (gender) updateFields['gender'] = gender;
-                    if (condition) updateFields['Condizione'] = condition;
-                }
-
-                // Add notes
-                const notes = document.getElementById('notes-input').value.trim();
-                if (notes) {
-                    updateFields['Note Prodotto'] = notes;
-                }
-
-                console.log('Saving fields:', updateFields);
-
-                // Update Airtable
-                const url = `https://api.airtable.com/v0/${BASE_ID}/${INVENTARIO_TABLE}/${currentRecord.id}`;
-                const response = await fetch(url, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${API_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ fields: updateFields })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error?.message || `API Error: ${response.status}`);
-                }
-
-                showToast(`${currentRecord.fields.SKU} salvato ✓`, 'success');
-                
-                hasChanges = false;
-                btn.textContent = '💾 Salva Modifiche';
-                
-                // Reload counters
-                loadCounters();
-                
-                // Clear for next search
-                clearSearch();
-
-            } catch (error) {
-                console.error('Save error:', error);
-                showToast(`Errore: ${error.message}`, 'error');
-                btn.disabled = false;
-                btn.textContent = '💾 Salva Modifiche';
-            }
-        }
-
-        // ============================================
-        // CLEAR SEARCH
-        // ============================================
-        function clearSearch() {
-            currentRecord = null;
-            currentAction = null;
-            hasChanges = false;
-            editMode = false;
-            
-            document.getElementById('sku-search').value = '';
-            document.getElementById('sku-display').style.display = 'none';
-            document.getElementById('btn-save').disabled = true;
-            document.getElementById('btn-save').textContent = '💾 Salva Modifiche';
-            document.getElementById('notes-input').value = '';
-            document.getElementById('info-readonly').style.display = 'block';
-            document.getElementById('info-editable').style.display = 'none';
-            
-            showEmptyState();
-            document.getElementById('sku-search').focus();
-        }
-
-        // ============================================
-        // MODAL
-        // ============================================
-        function openModalPhoto(type) {
-            if (!currentRecord) return;
-            const fields = currentRecord.fields;
-            
-            let url = type === 'front' 
-                ? (fields.AI_Front_Image_Link || fields.rawID_FRONT)
-                : (fields.AI_Back_Image_Link || fields.rawID_BACK);
-            
+        function openModal(url) {
             if (!url) return;
-            
-            // Convert to large thumbnail
-            if (!url.startsWith('http')) {
-                url = `https://drive.google.com/thumbnail?id=${url}&sz=w1200`;
-            } else {
-                const match = url.match(/\/d\/([^\/]+)/);
-                if (match) {
-                    url = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1200`;
-                }
-            }
-            
             document.getElementById('modal-img').src = url;
             document.getElementById('modal').classList.add('active');
         }
@@ -1620,48 +1888,51 @@
             document.getElementById('modal').classList.remove('active');
         }
 
-        // ============================================
-        // SETTINGS
-        // ============================================
-        function openSettings() {
-            const hasKey = !!localStorage.getItem('dirtytag_api_key_v3');
-            if (confirm(`API Key: ${hasKey ? 'Configurata ✓' : 'Non configurata'}\n\nVuoi cancellare i dati salvati e rifare login?`)) {
-                localStorage.removeItem('dirtytag_api_key_v3');
-                location.reload();
-            }
-        }
-
-        // ============================================
-        // KEYBOARD SHORTCUTS
-        // ============================================
+        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
-                return;
-            }
+            if (e.target.tagName === 'INPUT') return;
             
-            switch(e.key.toLowerCase()) {
-                case 'escape':
+            switch(e.key) {
+                case 'Escape':
                     closeModal();
                     break;
-                case 't':
-                    if (currentRecord) toggleAction('tagged');
+                case 'a':
+                case 'A':
+                    if (!document.getElementById('btn-approve').disabled) {
+                        approvePhotos();
+                    }
                     break;
-                case 'c':
-                    if (currentRecord) toggleAction('tocheck');
+                case 'r':
+                case 'R':
+                    if (!document.getElementById('btn-regenerate').disabled) {
+                        triggerRegeneration();
+                    }
                     break;
-                case 'x':
-                    if (currentRecord) toggleAction('discard');
+                case 'd':
+                case 'D':
+                    if (!document.getElementById('btn-defer').disabled) {
+                        deferProduct();
+                    }
                     break;
-                case 's':
-                    if (currentRecord && hasChanges) saveChanges();
+                case 'ArrowRight':
+                    skipProduct();
                     break;
-                case 'e':
-                    if (currentRecord) toggleEditMode();
+                case 'f':
+                case 'F':
+                    toggleRegenOption('front');
                     break;
-                case '/':
-                    e.preventDefault();
-                    document.getElementById('sku-search').focus();
+                case 'b':
+                case 'B':
+                    toggleRegenOption('back');
                     break;
+            }
+            
+            // Number keys for version selection
+            if (e.key >= '1' && e.key <= '9') {
+                const versionNum = parseInt(e.key);
+                if (versionNum <= currentVersions.length) {
+                    selectVersion(versionNum);
+                }
             }
         });
     </script>
