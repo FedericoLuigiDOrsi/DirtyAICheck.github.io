@@ -25,6 +25,8 @@
             --accent-blue-dim: rgba(59, 130, 246, 0.15);
             --accent-orange: #f59e0b;
             --accent-orange-dim: rgba(245, 158, 11, 0.15);
+            --accent-yellow: #eab308;
+            --accent-yellow-dim: rgba(234, 179, 8, 0.15);
         }
 
         * {
@@ -135,6 +137,7 @@
 
         .stat-value.green { color: var(--accent-green); }
         .stat-value.blue { color: var(--accent-blue); }
+        .stat-value.yellow { color: var(--accent-yellow); }
 
         .stat-label {
             font-size: 0.6rem;
@@ -337,7 +340,7 @@
         .photo-image-container {
             position: relative;
             width: 100%;
-            padding-top: 125%; /* 4:5 aspect ratio */
+            padding-top: 125%;
             background: var(--bg-tertiary);
             cursor: pointer;
             overflow: hidden;
@@ -671,6 +674,25 @@
             cursor: not-allowed;
         }
 
+        .btn-defer {
+            width: 100%;
+            background: transparent;
+            border: 2px solid var(--accent-yellow);
+            padding: 14px 24px;
+            color: var(--accent-yellow);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-defer:hover {
+            background: var(--accent-yellow-dim);
+        }
+
         .btn-skip {
             width: 100%;
             background: transparent;
@@ -689,6 +711,116 @@
         .btn-skip:hover {
             border-color: var(--border-hover);
             color: var(--text-primary);
+        }
+
+        /* Deferred List Section */
+        .deferred-section {
+            border-top: 1px solid var(--border);
+            max-height: 200px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .deferred-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: var(--bg-tertiary);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .deferred-header:hover {
+            background: var(--bg-primary);
+        }
+
+        .deferred-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-yellow);
+        }
+
+        .deferred-count {
+            background: var(--accent-yellow-dim);
+            border: 1px solid var(--accent-yellow);
+            padding: 2px 8px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .deferred-toggle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        .deferred-section.expanded .deferred-toggle {
+            transform: rotate(180deg);
+        }
+
+        .deferred-list {
+            flex: 1;
+            overflow-y: auto;
+            display: none;
+            padding: 8px;
+            background: var(--bg-primary);
+        }
+
+        .deferred-section.expanded .deferred-list {
+            display: block;
+        }
+
+        .deferred-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            font-size: 0.75rem;
+        }
+
+        .deferred-item-sku {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .deferred-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .deferred-item-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            transition: color 0.2s;
+        }
+
+        .deferred-item-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .deferred-item-btn.restore:hover {
+            color: var(--accent-green);
+        }
+
+        .deferred-empty {
+            text-align: center;
+            padding: 16px;
+            color: var(--text-muted);
+            font-size: 0.7rem;
         }
 
         /* Modal */
@@ -764,6 +896,11 @@
             color: var(--accent-blue);
         }
 
+        .toast.warning {
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
+
         /* Loading */
         .loading {
             display: flex;
@@ -823,7 +960,8 @@
         /* Keyboard Hints */
         .keyboard-hints {
             display: flex;
-            gap: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
             padding: 12px 20px;
             border-top: 1px solid var(--border);
             background: var(--bg-primary);
@@ -905,6 +1043,10 @@
                 <div class="stat-item">
                     <div class="stat-value blue" id="stat-regen">0</div>
                     <div class="stat-label">Rigenerati</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value yellow" id="stat-deferred">0</div>
+                    <div class="stat-label">Scartati</div>
                 </div>
             </div>
             <div class="progress-container">
@@ -992,6 +1134,9 @@
                     <button class="btn-regenerate" id="btn-regenerate" onclick="triggerRegeneration()" disabled>
                         ↻ Rigenera Selezionate
                     </button>
+                    <button class="btn-defer" id="btn-defer" onclick="deferProduct()">
+                        ⏸ Scarta per Check
+                    </button>
                     <button class="btn-skip" onclick="skipProduct()">
                         Salta Prodotto →
                     </button>
@@ -1000,8 +1145,23 @@
                 <div class="keyboard-hints">
                     <div class="hint"><kbd>A</kbd> Approva</div>
                     <div class="hint"><kbd>R</kbd> Rigenera</div>
+                    <div class="hint"><kbd>D</kbd> Scarta</div>
                     <div class="hint"><kbd>→</kbd> Salta</div>
                     <div class="hint"><kbd>1-9</kbd> Versione</div>
+                </div>
+
+                <!-- Deferred List -->
+                <div class="deferred-section" id="deferred-section">
+                    <div class="deferred-header" onclick="toggleDeferredList()">
+                        <div class="deferred-title">
+                            <span>⏸ Check Secondario</span>
+                            <span class="deferred-count" id="deferred-count">0</span>
+                        </div>
+                        <span class="deferred-toggle">▼</span>
+                    </div>
+                    <div class="deferred-list" id="deferred-list">
+                        <div class="deferred-empty">Nessun SKU scartato</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1024,16 +1184,28 @@
         let API_KEY = '';
         let allRecords = [];
         let pendingRecords = [];
+        let deferredRecords = []; // NEW: Lista SKU scartati per check secondario
         let currentRecord = null;
         let currentVersions = [];
         let selectedVersion = null;
-        let stats = { pending: 0, approved: 0, regenerated: 0 };
+        let stats = { pending: 0, approved: 0, regenerated: 0, deferred: 0 };
 
         // Init
         window.onload = function() {
             const savedKey = localStorage.getItem('dirtytag_api_key_v3');
             if (savedKey) {
                 document.getElementById('api-key').value = savedKey;
+            }
+            
+            // Load deferred list from localStorage
+            const savedDeferred = localStorage.getItem('dirtytag_deferred_list');
+            if (savedDeferred) {
+                try {
+                    deferredRecords = JSON.parse(savedDeferred);
+                    stats.deferred = deferredRecords.length;
+                } catch (e) {
+                    deferredRecords = [];
+                }
             }
         };
 
@@ -1134,6 +1306,7 @@
                 pendingRecords = allRecords;
                 stats.pending = pendingRecords.length;
                 updateStatsUI();
+                updateDeferredListUI();
                 
                 loadNextProduct();
 
@@ -1146,8 +1319,10 @@
             document.getElementById('stat-pending').textContent = stats.pending;
             document.getElementById('stat-approved').textContent = stats.approved;
             document.getElementById('stat-regen').textContent = stats.regenerated;
+            document.getElementById('stat-deferred').textContent = stats.deferred;
+            document.getElementById('deferred-count').textContent = stats.deferred;
             
-            const total = stats.pending + stats.approved + stats.regenerated;
+            const total = stats.pending + stats.approved + stats.regenerated + stats.deferred;
             const progress = total > 0 ? ((stats.approved + stats.regenerated) / total) * 100 : 0;
             document.getElementById('progress-fill').style.width = `${progress}%`;
             document.getElementById('progress-text').textContent = `${Math.round(progress)}% completato`;
@@ -1217,8 +1392,6 @@
                     version: i,
                     label: `v${i}`,
                     isCurrent: i === regenCount,
-                    // For current version, use the stored links
-                    // For previous versions, we'll use placeholder (can't easily reconstruct)
                     frontUrl: i === regenCount ? aiFrontLink : null,
                     backUrl: i === regenCount ? aiBackLink : null
                 });
@@ -1237,13 +1410,7 @@
             const container = document.getElementById('photo-section');
             const sku = fields.SKU;
             
-            // RAW photo URLs (from Drive folder)
-            // These are constructed from the folder structure
             const folderId = fields.RAW_FolderID || '';
-            
-            // For RAW photos, we need to list them or use known naming convention
-            // Since we can't list Drive from frontend, we'll use the thumbnail API with guessed file names
-            // This is a limitation - in production, these URLs should come from Airtable fields
             
             // Current AI photos
             const aiFront = selectedVersion?.frontUrl || '';
@@ -1253,8 +1420,6 @@
             const aiFrontId = extractDriveFileId(aiFront);
             const aiBackId = extractDriveFileId(aiBack);
             
-            // For RAW, we'd need stored links - let's check if they exist in fields
-            // If not, show placeholder
             const rawFrontUrl = fields.RAW_Front_URL || '';
             const rawBackUrl = fields.RAW_Back_URL || '';
             const rawFrontId = extractDriveFileId(rawFrontUrl);
@@ -1341,8 +1506,6 @@
                 const isSelected = selectedVersion && selectedVersion.version === v.version;
                 const isCurrent = v.isCurrent;
                 
-                // For current version, use the actual IDs
-                // For older versions, show placeholder (we don't have their IDs stored)
                 const frontId = isCurrent ? currentFrontId : null;
                 const backId = isCurrent ? currentBackId : null;
                 
@@ -1382,8 +1545,6 @@
             if (version) {
                 selectedVersion = version;
                 document.getElementById('viewing-version').textContent = version.label;
-                
-                // Re-render to update selection
                 renderPhotoSection(currentRecord.fields);
             }
         }
@@ -1391,20 +1552,15 @@
         function extractDriveFileId(url) {
             if (!url) return null;
             
-            // Handle various Google Drive URL formats
-            // Format 1: https://drive.google.com/file/d/FILE_ID/view
             const match1 = url.match(/\/file\/d\/([^\/]+)/);
             if (match1) return match1[1];
             
-            // Format 2: https://drive.google.com/open?id=FILE_ID
             const match2 = url.match(/[?&]id=([^&]+)/);
             if (match2) return match2[1];
             
-            // Format 3: https://drive.google.com/thumbnail?id=FILE_ID
             const match3 = url.match(/thumbnail\?id=([^&]+)/);
             if (match3) return match3[1];
             
-            // Format 4: Direct file ID
             if (url.match(/^[a-zA-Z0-9_-]{25,}$/)) return url;
             
             return null;
@@ -1446,7 +1602,6 @@
             btn.textContent = 'Approvazione...';
 
             try {
-                // Update Airtable: Set AI_Quality_Check = APPROVED
                 await apiRequest(INVENTARIO_TABLE, {
                     recordId: currentRecord.id,
                     method: 'PATCH',
@@ -1458,7 +1613,6 @@
                     }
                 });
 
-                // Update local state
                 const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
                 if (idx !== -1) {
                     pendingRecords.splice(idx, 1);
@@ -1498,7 +1652,6 @@
             btn.textContent = 'Invio richiesta...';
 
             try {
-                // Determine regeneration scope
                 let regenScope = '';
                 if (frontChecked && backChecked) {
                     regenScope = 'BOTH';
@@ -1508,8 +1661,6 @@
                     regenScope = 'BACK';
                 }
 
-                // Update Airtable: Trigger regeneration
-                // This sets AI_Regenerate_Trigger = TRUE which W3 will pick up
                 await apiRequest(INVENTARIO_TABLE, {
                     recordId: currentRecord.id,
                     method: 'PATCH',
@@ -1523,7 +1674,6 @@
                     }
                 });
 
-                // Update local state
                 const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
                 if (idx !== -1) {
                     pendingRecords.splice(idx, 1);
@@ -1547,13 +1697,142 @@
             }
         }
 
-        async function skipProduct() {
+        // =====================================================
+        // DEFER PRODUCT - Scarta per Check Secondario
+        // =====================================================
+        async function deferProduct() {
+            if (!currentRecord) return;
+            
+            const btn = document.getElementById('btn-defer');
+            btn.disabled = true;
+            btn.textContent = 'Scarto in corso...';
+
+            try {
+                // Update Airtable: Set AI_Quality_Check = DEFERRED
+                await apiRequest(INVENTARIO_TABLE, {
+                    recordId: currentRecord.id,
+                    method: 'PATCH',
+                    body: {
+                        fields: {
+                            'AI_Quality_Check': 'DEFERRED'
+                        }
+                    }
+                });
+
+                // Add to deferred list
+                const deferredItem = {
+                    id: currentRecord.id,
+                    sku: currentRecord.fields.SKU,
+                    brand: currentRecord.fields.Brand || '—',
+                    timestamp: new Date().toISOString()
+                };
+                deferredRecords.push(deferredItem);
+                
+                // Save to localStorage
+                localStorage.setItem('dirtytag_deferred_list', JSON.stringify(deferredRecords));
+
+                // Remove from pending
+                const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
+                if (idx !== -1) {
+                    pendingRecords.splice(idx, 1);
+                }
+
+                stats.pending--;
+                stats.deferred++;
+                updateStatsUI();
+                updateDeferredListUI();
+
+                showToast(`${currentRecord.fields.SKU} scartato per check secondario ⏸`, 'warning');
+                
+                btn.textContent = '⏸ Scarta per Check';
+                btn.disabled = false;
+                
+                loadNextProduct();
+
+            } catch (error) {
+                showToast(`Errore: ${error.message}`, 'error');
+                btn.disabled = false;
+                btn.textContent = '⏸ Scarta per Check';
+            }
+        }
+
+        // Restore deferred product back to PENDING
+        async function restoreDeferredProduct(recordId, sku) {
+            try {
+                await apiRequest(INVENTARIO_TABLE, {
+                    recordId: recordId,
+                    method: 'PATCH',
+                    body: {
+                        fields: {
+                            'AI_Quality_Check': 'PENDING'
+                        }
+                    }
+                });
+
+                // Remove from deferred list
+                const idx = deferredRecords.findIndex(r => r.id === recordId);
+                if (idx !== -1) {
+                    deferredRecords.splice(idx, 1);
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('dirtytag_deferred_list', JSON.stringify(deferredRecords));
+
+                stats.deferred--;
+                stats.pending++;
+                updateStatsUI();
+                updateDeferredListUI();
+
+                showToast(`${sku} ripristinato in coda ↺`, 'success');
+                
+                // Reload to include restored item
+                loadPendingRecords();
+
+            } catch (error) {
+                showToast(`Errore ripristino: ${error.message}`, 'error');
+            }
+        }
+
+        // Toggle deferred list visibility
+        function toggleDeferredList() {
+            const section = document.getElementById('deferred-section');
+            section.classList.toggle('expanded');
+        }
+
+        // Update deferred list UI
+        function updateDeferredListUI() {
+            const container = document.getElementById('deferred-list');
+            
+            if (deferredRecords.length === 0) {
+                container.innerHTML = '<div class="deferred-empty">Nessun SKU scartato</div>';
+                return;
+            }
+
+            let html = '';
+            deferredRecords.forEach(item => {
+                html += `
+                    <div class="deferred-item">
+                        <div>
+                            <span class="deferred-item-sku">${item.sku}</span>
+                            <span style="color: var(--text-muted); font-size: 0.65rem; margin-left: 8px;">${item.brand}</span>
+                        </div>
+                        <div class="deferred-item-actions">
+                            <button class="deferred-item-btn restore" onclick="restoreDeferredProduct('${item.id}', '${item.sku}')" title="Ripristina in coda">
+                                ↺ Ripristina
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function skipProduct() {
             if (!currentRecord) return;
 
-            // Just move to next without changing anything
             const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
             if (idx !== -1) {
-                // Move to end of queue
                 const skipped = pendingRecords.splice(idx, 1)[0];
                 pendingRecords.push(skipped);
             }
@@ -1573,11 +1852,18 @@
 
         function showEmptyState() {
             document.getElementById('current-sku').textContent = 'COMPLETATO';
+            
+            // Check if there are deferred items
+            const deferredMsg = stats.deferred > 0 
+                ? `<p class="empty-text" style="margin-top: 12px; color: var(--accent-yellow);">Hai ${stats.deferred} SKU da verificare nel check secondario.</p>`
+                : '';
+            
             document.getElementById('photo-section').innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">✓</div>
                     <h2 class="empty-title">QC Review Completata</h2>
                     <p class="empty-text">Tutti i prodotti in coda sono stati verificati.</p>
+                    ${deferredMsg}
                 </div>
             `;
         }
@@ -1620,6 +1906,12 @@
                 case 'R':
                     if (!document.getElementById('btn-regenerate').disabled) {
                         triggerRegeneration();
+                    }
+                    break;
+                case 'd':
+                case 'D':
+                    if (!document.getElementById('btn-defer').disabled) {
+                        deferProduct();
                     }
                     break;
                 case 'ArrowRight':
