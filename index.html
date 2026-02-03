@@ -1661,13 +1661,16 @@
                     regenScope = 'BACK';
                 }
 
+                // ⚠️ CRITICAL: Boolean fields MUST use integer 1/0 for Airtable
+                // Product_Status reset to RAW_PROCESSED to re-enter AI pipeline
+                // W3 will intercept AI_Regenerate_Trigger = 1 and regenerate
                 await apiRequest(INVENTARIO_TABLE, {
                     recordId: currentRecord.id,
                     method: 'PATCH',
                     body: {
                         fields: {
                             'AI_Quality_Check': 'REJECTED',
-                            'AI_Regenerate_Trigger': true,
+                            'AI_Regenerate_Trigger': 1,  // ✅ Integer, not boolean
                             'AI_Regen_Scope': regenScope,
                             'Product_Status': 'RAW_PROCESSED'
                         }
