@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DirtyTag — AI Photo QC Review</title>
+    <title>DirtyTag — AI Version Picker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -27,13 +27,11 @@
             --accent-orange-dim: rgba(245, 158, 11, 0.15);
             --accent-yellow: #eab308;
             --accent-yellow-dim: rgba(234, 179, 8, 0.15);
+            --accent-purple: #a855f7;
+            --accent-purple-dim: rgba(168, 85, 247, 0.15);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'JetBrains Mono', monospace;
@@ -44,7 +42,7 @@
             line-height: 1.5;
         }
 
-        /* Header */
+        /* ═══════════════════════ HEADER ═══════════════════════ */
         .header {
             background: var(--bg-secondary);
             border-bottom: 1px solid var(--border);
@@ -56,974 +54,324 @@
             top: 0;
             z-index: 100;
         }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .logo span {
-            color: var(--accent-red);
-        }
-
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .logo-section { display: flex; align-items: center; gap: 12px; }
+        .logo { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.5px; }
+        .logo span { color: var(--accent-red); }
         .module-badge {
-            background: var(--accent-red-dim);
-            border: 1px solid var(--accent-red);
-            color: var(--accent-red);
+            background: var(--accent-purple-dim);
+            border: 1px solid var(--accent-purple);
+            color: var(--accent-purple);
             padding: 4px 10px;
             font-size: 0.65rem;
             font-weight: 600;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
-
-        .sku-display {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .sku-label {
-            color: var(--text-muted);
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
+        .sku-display { display: flex; align-items: center; gap: 10px; }
+        .sku-label { color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
         .sku-value {
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            padding: 6px 14px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            color: var(--text-primary);
+            background: var(--bg-primary); border: 1px solid var(--border);
+            padding: 6px 14px; font-size: 0.9rem; font-weight: 600; letter-spacing: 1px;
         }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-
-        .stats-row {
-            display: flex;
-            gap: 20px;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--accent-red);
-        }
-
+        .header-right { display: flex; align-items: center; gap: 24px; }
+        .stats-row { display: flex; gap: 20px; }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 1.2rem; font-weight: 700; color: var(--accent-red); }
         .stat-value.green { color: var(--accent-green); }
         .stat-value.blue { color: var(--accent-blue); }
         .stat-value.yellow { color: var(--accent-yellow); }
+        .stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .progress-container { width: 200px; }
+        .progress-bar { height: 4px; background: var(--bg-tertiary); overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-purple), var(--accent-orange)); transition: width 0.4s ease; }
+        .progress-text { font-size: 0.6rem; color: var(--text-muted); text-align: right; margin-top: 4px; }
 
-        .stat-label {
-            font-size: 0.6rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .progress-container {
-            width: 200px;
-        }
-
-        .progress-bar {
-            height: 4px;
-            background: var(--bg-tertiary);
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-red), var(--accent-orange));
-            transition: width 0.4s ease;
-        }
-
-        .progress-text {
-            font-size: 0.6rem;
-            color: var(--text-muted);
-            text-align: right;
-            margin-top: 4px;
-        }
-
-        /* Login Panel */
+        /* ═══════════════════════ LOGIN ═══════════════════════ */
         .login-panel {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: calc(100vh - 60px);
-            padding: 40px;
+            display: flex; align-items: center; justify-content: center;
+            min-height: calc(100vh - 60px); padding: 40px;
         }
-
         .login-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            padding: 40px; width: 100%; max-width: 440px;
         }
-
-        .login-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .login-subtitle {
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
+        .login-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 600; margin-bottom: 8px; }
+        .login-subtitle { color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
         .form-input {
-            width: 100%;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            padding: 12px 14px;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 0.85rem;
-            transition: border-color 0.2s;
+            width: 100%; background: var(--bg-primary); border: 1px solid var(--border);
+            padding: 12px 14px; color: var(--text-primary); font-family: inherit; font-size: 0.85rem; transition: border-color 0.2s;
         }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--accent-red);
-        }
-
+        .form-input:focus { outline: none; border-color: var(--accent-purple); }
         .btn-primary {
-            width: 100%;
-            background: var(--accent-red);
-            border: none;
-            padding: 14px 24px;
-            color: white;
-            font-family: inherit;
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
+            width: 100%; background: var(--accent-purple); border: none;
+            padding: 14px 24px; color: white; font-family: inherit; font-size: 0.8rem;
+            font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-primary:hover { filter: brightness(0.9); }
+        .btn-primary:disabled { background: var(--bg-tertiary); cursor: not-allowed; }
+
+        /* ═══════════════════════ MAIN APP LAYOUT ═══════════════════════ */
+        .main-app { display: none; min-height: calc(100vh - 60px); }
+        .app-container { display: grid; grid-template-columns: 1fr 340px; min-height: calc(100vh - 60px); }
+
+        /* ═══════════════════════ PHOTO SECTION ═══════════════════════ */
+        .photo-section { padding: 24px; overflow-y: auto; }
+
+        /* RAW Reference Row */
+        .raw-reference {
+            background: var(--bg-secondary); border: 1px solid var(--border); margin-bottom: 20px;
+        }
+        .raw-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--bg-tertiary);
+        }
+        .raw-title { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-blue); }
+        .raw-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
+        .raw-photo-slot { background: var(--bg-primary); position: relative; }
+        .raw-photo-slot .slot-label {
+            position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.85);
+            padding: 3px 8px; font-size: 0.55rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 1px; z-index: 10; color: var(--accent-blue);
+        }
+        .raw-img-container {
+            position: relative; width: 100%; padding-top: 100%; background: var(--bg-tertiary);
+            cursor: pointer; overflow: hidden;
+        }
+        .raw-img-container img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: contain; transition: transform 0.3s;
+        }
+        .raw-img-container:hover img { transform: scale(1.02); }
+
+        /* Versions Grid */
+        .versions-container {
+            background: var(--bg-secondary); border: 1px solid var(--border); margin-bottom: 20px;
+        }
+        .versions-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--bg-tertiary);
+        }
+        .versions-title { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-orange); }
+        .versions-meta { display: flex; gap: 12px; align-items: center; }
+        .versions-meta-item { font-size: 0.6rem; color: var(--text-muted); }
+        .versions-meta-item strong { color: var(--text-secondary); }
+
+        .filter-bar {
+            display: flex; align-items: center; gap: 16px;
+            padding: 10px 16px; border-bottom: 1px solid var(--border);
+        }
+        .filter-toggle {
+            display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.7rem; color: var(--text-secondary);
+        }
+        .filter-toggle input { display: none; }
+        .filter-indicator {
+            width: 32px; height: 16px; background: var(--bg-tertiary); border: 1px solid var(--border);
+            border-radius: 8px; position: relative; transition: all 0.2s;
+        }
+        .filter-indicator::after {
+            content: ''; position: absolute; top: 2px; left: 2px;
+            width: 10px; height: 10px; background: var(--text-muted); border-radius: 50%; transition: all 0.2s;
+        }
+        .filter-toggle input:checked + .filter-indicator { background: var(--accent-green-dim); border-color: var(--accent-green); }
+        .filter-toggle input:checked + .filter-indicator::after { left: 18px; background: var(--accent-green); }
+
+        /* Version Groups */
+        .version-group { border-bottom: 1px solid var(--border); }
+        .version-group:last-child { border-bottom: none; }
+        .version-group-header {
+            padding: 8px 16px; background: var(--bg-primary);
+            font-size: 0.65rem; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .version-group-header.discarded { color: var(--accent-red); opacity: 0.6; }
+
+        .version-images {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px; padding: 12px 16px;
         }
 
-        .btn-primary:hover {
-            background: #c41a1f;
-        }
-
-        .btn-primary:disabled {
-            background: var(--bg-tertiary);
-            cursor: not-allowed;
-        }
-
-        /* Main App */
-        .main-app {
-            display: none;
-            min-height: calc(100vh - 60px);
-        }
-
-        .app-container {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            min-height: calc(100vh - 60px);
-        }
-
-        /* Photo Comparison Section */
-        .photo-section {
-            padding: 24px;
-            overflow-y: auto;
-        }
-
-        .comparison-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            margin-bottom: 24px;
-        }
-
-        .comparison-column {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-        }
-
-        .column-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-            background: var(--bg-tertiary);
-        }
-
-        .column-title {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .column-title.raw { color: var(--accent-blue); }
-        .column-title.ai { color: var(--accent-green); }
-
-        .column-badge {
-            font-size: 0.6rem;
-            padding: 3px 8px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-        }
-
-        .photo-pair {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1px;
-            background: var(--border);
-        }
-
-        .photo-slot {
-            background: var(--bg-primary);
-            position: relative;
-        }
-
-        .photo-slot-label {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 4px 8px;
-            font-size: 0.6rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            z-index: 10;
-        }
-
-        .photo-slot-label.front { color: var(--accent-red); }
-        .photo-slot-label.back { color: var(--text-secondary); }
-
-        .photo-image-container {
-            position: relative;
-            width: 100%;
-            padding-top: 125%;
-            background: var(--bg-tertiary);
-            cursor: pointer;
-            overflow: hidden;
-        }
-
-        .photo-image-container img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            transition: transform 0.3s;
-        }
-
-        .photo-image-container:hover img {
-            transform: scale(1.02);
-        }
-
-        .photo-placeholder {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            font-size: 0.7rem;
-        }
-
-        /* Version History */
-        .version-section {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-        }
-
-        .version-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-            background: var(--bg-tertiary);
-        }
-
-        .version-title {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--accent-orange);
-        }
-
-        .version-grid {
-            display: flex;
-            gap: 12px;
-            padding: 16px;
-            overflow-x: auto;
-        }
-
+        /* Individual Version Card */
         .version-card {
-            flex: 0 0 180px;
-            background: var(--bg-primary);
-            border: 2px solid var(--border);
-            cursor: pointer;
-            transition: all 0.2s;
+            background: var(--bg-primary); border: 2px solid var(--border);
+            cursor: pointer; transition: all 0.2s; position: relative;
+        }
+        .version-card:hover { border-color: var(--border-hover); }
+        .version-card.selected-front { border-color: var(--accent-green); box-shadow: 0 0 20px var(--accent-green-dim); }
+        .version-card.selected-back { border-color: var(--accent-blue); box-shadow: 0 0 20px var(--accent-blue-dim); }
+        .version-card.below-min { opacity: 0.25; filter: grayscale(0.5); }
+        .version-card.below-min.hidden { display: none; }
+
+        .version-card-img {
+            position: relative; width: 100%; padding-top: 125%; background: var(--bg-tertiary); overflow: hidden;
+        }
+        .version-card-img img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;
         }
 
-        .version-card:hover {
-            border-color: var(--border-hover);
+        .version-card-info {
+            padding: 8px 10px; border-top: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
         }
+        .version-card-name { font-size: 0.65rem; font-weight: 500; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
+        .version-card-res { font-size: 0.6rem; font-weight: 600; padding: 2px 6px; }
+        .version-card-res.ok { background: var(--accent-green-dim); color: var(--accent-green); }
+        .version-card-res.low { background: var(--accent-red-dim); color: var(--accent-red); }
 
-        .version-card.selected {
-            border-color: var(--accent-orange);
-            box-shadow: 0 0 20px var(--accent-orange-dim);
+        .version-card-type {
+            position: absolute; top: 6px; left: 6px; padding: 2px 7px;
+            font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            background: rgba(0,0,0,0.85);
         }
+        .version-card-type.front { color: var(--accent-red); }
+        .version-card-type.back { color: var(--text-secondary); }
+        .version-card-type.unknown { color: var(--accent-yellow); }
 
-        .version-card.current {
-            border-color: var(--accent-green);
-            box-shadow: 0 0 20px var(--accent-green-dim);
+        .selection-badge {
+            position: absolute; top: 6px; right: 6px; padding: 3px 8px;
+            font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
         }
+        .selection-badge.front-sel { background: var(--accent-green); color: #000; }
+        .selection-badge.back-sel { background: var(--accent-blue); color: #fff; }
 
-        .version-card-header {
-            padding: 8px 12px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .version-number {
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .version-tag {
-            font-size: 0.55rem;
-            padding: 2px 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .version-tag.current {
-            background: var(--accent-green-dim);
-            color: var(--accent-green);
-        }
-
-        .version-tag.selected {
-            background: var(--accent-orange-dim);
-            color: var(--accent-orange);
-        }
-
-        .version-thumbs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1px;
-            background: var(--border);
-        }
-
-        .version-thumb {
-            background: var(--bg-tertiary);
-            padding-top: 75%;
-            position: relative;
-        }
-
-        .version-thumb img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .no-versions {
-            padding: 40px;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.75rem;
-        }
-
-        /* Controls Panel */
+        /* ═══════════════════════ CONTROLS PANEL ═══════════════════════ */
         .controls-panel {
-            background: var(--bg-secondary);
-            border-left: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
+            background: var(--bg-secondary); border-left: 1px solid var(--border);
+            display: flex; flex-direction: column;
         }
-
-        .controls-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
-            background: var(--bg-tertiary);
-        }
-
-        .controls-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .controls-subtitle {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-        }
-
-        .controls-body {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .control-section {
-            margin-bottom: 24px;
-        }
-
-        .control-label {
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-
-        .info-grid {
-            display: grid;
-            gap: 8px;
-        }
-
+        .controls-header { padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--bg-tertiary); }
+        .controls-title { font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
+        .controls-subtitle { font-size: 0.7rem; color: var(--text-muted); }
+        .controls-body { flex: 1; padding: 20px; overflow-y: auto; }
+        .control-section { margin-bottom: 24px; }
+        .control-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .info-grid { display: grid; gap: 6px; }
         .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 12px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
+            display: flex; justify-content: space-between; padding: 8px 12px;
+            background: var(--bg-primary); border: 1px solid var(--border);
         }
+        .info-key { color: var(--text-muted); font-size: 0.7rem; }
+        .info-value { color: var(--text-primary); font-size: 0.75rem; font-weight: 500; }
 
-        .info-key {
-            color: var(--text-muted);
-            font-size: 0.7rem;
+        /* Selection Summary */
+        .selection-summary {
+            background: var(--bg-primary); border: 1px solid var(--border); padding: 12px;
         }
+        .selection-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 0; border-bottom: 1px solid var(--border);
+        }
+        .selection-row:last-child { border-bottom: none; }
+        .selection-label { font-size: 0.7rem; font-weight: 600; }
+        .selection-label.front { color: var(--accent-green); }
+        .selection-label.back { color: var(--accent-blue); }
+        .selection-detail { font-size: 0.65rem; color: var(--text-secondary); text-align: right; }
+        .selection-detail .res { font-weight: 600; }
+        .selection-detail .res.ok { color: var(--accent-green); }
+        .selection-detail .res.low { color: var(--accent-red); }
+        .selection-empty { font-size: 0.65rem; color: var(--text-muted); font-style: italic; }
 
-        .info-value {
-            color: var(--text-primary);
-            font-size: 0.75rem;
-            font-weight: 500;
+        .links-changed-badge {
+            display: none; margin-top: 10px; padding: 8px 12px;
+            background: var(--accent-orange-dim); border: 1px solid var(--accent-orange);
+            font-size: 0.65rem; color: var(--accent-orange); text-align: center;
         }
-
-        /* Regeneration Checkboxes */
-        .regen-options {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .regen-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .regen-checkbox:hover {
-            border-color: var(--border-hover);
-        }
-
-        .regen-checkbox.checked {
-            border-color: var(--accent-red);
-            background: var(--accent-red-dim);
-        }
-
-        .regen-checkbox input {
-            display: none;
-        }
-
-        .checkbox-indicator {
-            width: 18px;
-            height: 18px;
-            border: 2px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .regen-checkbox.checked .checkbox-indicator {
-            border-color: var(--accent-red);
-            background: var(--accent-red);
-        }
-
-        .checkbox-indicator::after {
-            content: '✓';
-            color: white;
-            font-size: 0.7rem;
-            font-weight: 700;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .regen-checkbox.checked .checkbox-indicator::after {
-            opacity: 1;
-        }
-
-        .checkbox-label {
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
+        .links-changed-badge.visible { display: block; }
 
         /* Action Buttons */
-        .controls-footer {
-            padding: 20px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
+        .controls-footer { padding: 20px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
         .btn-approve {
-            width: 100%;
-            background: var(--accent-green);
-            border: none;
-            padding: 16px 24px;
-            color: white;
-            font-family: inherit;
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
+            width: 100%; background: var(--accent-green); border: none;
+            padding: 16px 24px; color: white; font-family: inherit; font-size: 0.8rem;
+            font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
         }
-
-        .btn-approve:hover {
-            background: #00b85c;
+        .btn-approve:hover { background: #00b85c; }
+        .btn-approve:disabled { background: var(--bg-tertiary); cursor: not-allowed; color: var(--text-muted); }
+        .btn-reject {
+            width: 100%; background: transparent; border: 2px solid var(--accent-red);
+            padding: 14px 24px; color: var(--accent-red); font-family: inherit; font-size: 0.8rem;
+            font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
         }
-
-        .btn-approve:disabled {
-            background: var(--bg-tertiary);
-            cursor: not-allowed;
-        }
-
-        .btn-regenerate {
-            width: 100%;
-            background: transparent;
-            border: 2px solid var(--accent-red);
-            padding: 14px 24px;
-            color: var(--accent-red);
-            font-family: inherit;
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-regenerate:hover {
-            background: var(--accent-red-dim);
-        }
-
-        .btn-regenerate:disabled {
-            border-color: var(--bg-tertiary);
-            color: var(--text-muted);
-            cursor: not-allowed;
-        }
-
+        .btn-reject:hover { background: var(--accent-red-dim); }
         .btn-defer {
-            width: 100%;
-            background: transparent;
-            border: 2px solid var(--accent-yellow);
-            padding: 14px 24px;
-            color: var(--accent-yellow);
-            font-family: inherit;
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
+            width: 100%; background: transparent; border: 2px solid var(--accent-yellow);
+            padding: 14px 24px; color: var(--accent-yellow); font-family: inherit; font-size: 0.8rem;
+            font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
         }
-
-        .btn-defer:hover {
-            background: var(--accent-yellow-dim);
-        }
-
+        .btn-defer:hover { background: var(--accent-yellow-dim); }
         .btn-skip {
-            width: 100%;
-            background: transparent;
-            border: 1px solid var(--border);
-            padding: 12px 24px;
-            color: var(--text-secondary);
-            font-family: inherit;
-            font-size: 0.7rem;
-            font-weight: 500;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
+            width: 100%; background: transparent; border: 1px solid var(--border);
+            padding: 12px 24px; color: var(--text-secondary); font-family: inherit; font-size: 0.7rem;
+            font-weight: 500; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
         }
+        .btn-skip:hover { border-color: var(--border-hover); color: var(--text-primary); }
 
-        .btn-skip:hover {
-            border-color: var(--border-hover);
-            color: var(--text-primary);
-        }
+        .keyboard-hints { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px 20px; border-top: 1px solid var(--border); background: var(--bg-primary); }
+        .hint { display: flex; align-items: center; gap: 6px; font-size: 0.65rem; color: var(--text-muted); }
+        .hint kbd { background: var(--bg-tertiary); border: 1px solid var(--border); padding: 2px 6px; font-family: inherit; }
 
-        /* Deferred List Section */
-        .deferred-section {
-            border-top: 1px solid var(--border);
-            max-height: 200px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .deferred-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
-            background: var(--bg-tertiary);
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .deferred-header:hover {
-            background: var(--bg-primary);
-        }
-
-        .deferred-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--accent-yellow);
-        }
-
-        .deferred-count {
-            background: var(--accent-yellow-dim);
-            border: 1px solid var(--accent-yellow);
-            padding: 2px 8px;
-            font-size: 0.65rem;
-            font-weight: 700;
-        }
-
-        .deferred-toggle {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            transition: transform 0.2s;
-        }
-
-        .deferred-section.expanded .deferred-toggle {
-            transform: rotate(180deg);
-        }
-
-        .deferred-list {
-            flex: 1;
-            overflow-y: auto;
-            display: none;
-            padding: 8px;
-            background: var(--bg-primary);
-        }
-
-        .deferred-section.expanded .deferred-list {
-            display: block;
-        }
-
-        .deferred-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 12px;
-            margin-bottom: 4px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            font-size: 0.75rem;
-        }
-
-        .deferred-item-sku {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .deferred-item-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .deferred-item-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 0.7rem;
-            padding: 4px 8px;
-            transition: color 0.2s;
-        }
-
-        .deferred-item-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .deferred-item-btn.restore:hover {
-            color: var(--accent-green);
-        }
-
-        .deferred-empty {
-            text-align: center;
-            padding: 16px;
-            color: var(--text-muted);
-            font-size: 0.7rem;
-        }
-
-        /* Modal */
+        /* ═══════════════════════ MODAL ═══════════════════════ */
         .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s;
-            cursor: pointer;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s; cursor: pointer;
         }
-
-        .modal.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            font-size: 2rem;
-            color: white;
-            cursor: pointer;
+        .modal.active { opacity: 1; visibility: visible; }
+        .modal img { max-width: 90%; max-height: 90%; object-fit: contain; }
+        .modal-close { position: absolute; top: 20px; right: 30px; font-size: 2rem; color: white; cursor: pointer; }
+        .modal-res-info {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); padding: 8px 16px; font-size: 0.8rem; color: var(--text-secondary);
         }
 
         /* Toast */
         .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            padding: 14px 28px;
-            font-size: 0.8rem;
-            opacity: 0;
-            transition: all 0.3s;
-            z-index: 1001;
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--bg-secondary); border: 1px solid var(--border); padding: 14px 28px;
+            font-size: 0.8rem; opacity: 0; transition: all 0.3s; z-index: 1001;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { border-color: var(--accent-green); color: var(--accent-green); }
+        .toast.error { border-color: var(--accent-red); color: var(--accent-red); }
+        .toast.info { border-color: var(--accent-blue); color: var(--accent-blue); }
+        .toast.warning { border-color: var(--accent-yellow); color: var(--accent-yellow); }
+
+        /* Loading & Empty */
+        .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px; gap: 16px; }
+        .loading-spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent-purple); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { color: var(--text-muted); font-size: 0.75rem; }
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 40px; text-align: center; }
+        .empty-icon { font-size: 4rem; margin-bottom: 20px; }
+        .empty-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 600; margin-bottom: 8px; color: var(--accent-green); }
+        .empty-text { color: var(--text-muted); font-size: 0.85rem; }
+        .error-container { padding: 40px; text-align: center; }
+        .error-title { color: var(--accent-red); font-size: 1rem; margin-bottom: 12px; }
+        .error-message { background: var(--bg-secondary); border: 1px solid var(--border); padding: 16px; margin-bottom: 20px; font-size: 0.75rem; color: var(--text-secondary); text-align: left; overflow-x: auto; }
+        .btn-retry { background: var(--accent-purple); border: none; padding: 12px 24px; color: white; font-family: inherit; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+
+        .photo-placeholder {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted); font-size: 0.7rem;
         }
 
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
+        /* Desc preview */
+        .desc-preview {
+            background: var(--bg-primary); border: 1px solid var(--border); padding: 10px 12px;
+            max-height: 120px; overflow-y: auto; font-size: 0.65rem; color: var(--text-secondary); line-height: 1.6;
         }
-
-        .toast.success {
-            border-color: var(--accent-green);
-            color: var(--accent-green);
-        }
-
-        .toast.error {
-            border-color: var(--accent-red);
-            color: var(--accent-red);
-        }
-
-        .toast.info {
-            border-color: var(--accent-blue);
-            color: var(--accent-blue);
-        }
-
-        .toast.warning {
-            border-color: var(--accent-yellow);
-            color: var(--accent-yellow);
-        }
-
-        /* Loading */
-        .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 60px;
-            gap: 16px;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border);
-            border-top-color: var(--accent-red);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            color: var(--text-muted);
-            font-size: 0.75rem;
-        }
-
-        /* Empty State */
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 40px;
-            text-align: center;
-        }
-
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-        }
-
-        .empty-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--accent-green);
-        }
-
-        .empty-text {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        /* Keyboard Hints */
-        .keyboard-hints {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            padding: 12px 20px;
-            border-top: 1px solid var(--border);
-            background: var(--bg-primary);
-        }
-
-        .hint {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.65rem;
-            color: var(--text-muted);
-        }
-
-        .hint kbd {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            padding: 2px 6px;
-            font-family: inherit;
-        }
-
-        /* Error */
-        .error-container {
-            padding: 40px;
-            text-align: center;
-        }
-
-        .error-title {
-            color: var(--accent-red);
-            font-size: 1rem;
-            margin-bottom: 12px;
-        }
-
-        .error-message {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            padding: 16px;
-            margin-bottom: 20px;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-align: left;
-            overflow-x: auto;
-        }
-
-        .btn-retry {
-            background: var(--accent-red);
-            border: none;
-            padding: 12px 24px;
-            color: white;
-            font-family: inherit;
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
+        .desc-preview .desc-title { font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="header-left">
             <div class="logo-section">
                 <div class="logo">DIRTY<span>TAG</span></div>
-                <div class="module-badge">AI Photo QC</div>
+                <div class="module-badge">Version Picker</div>
             </div>
             <div class="sku-display" id="sku-display" style="display: none;">
                 <span class="sku-label">SKU</span>
@@ -1041,8 +389,8 @@
                     <div class="stat-label">Approvati</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value blue" id="stat-regen">0</div>
-                    <div class="stat-label">Rigenerati</div>
+                    <div class="stat-value blue" id="stat-rejected">0</div>
+                    <div class="stat-label">Rigettati</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value yellow" id="stat-deferred">0</div>
@@ -1058,84 +406,67 @@
         </div>
     </header>
 
-    <!-- Login Panel -->
     <div class="login-panel" id="login-panel">
         <div class="login-card">
-            <h1 class="login-title">AI Photo QC Review</h1>
-            <p class="login-subtitle">Sistema di quality check per foto AI-generated</p>
-            
+            <h1 class="login-title">AI Version Picker</h1>
+            <p class="login-subtitle">Recovery pipeline — Seleziona le migliori foto AI per ogni SKU</p>
             <div class="form-group">
                 <label class="form-label">Airtable API Key</label>
                 <input type="password" class="form-input" id="api-key" placeholder="pat...">
             </div>
-            
-            <button class="btn-primary" onclick="startApp()">Avvia Review</button>
+            <div class="form-group">
+                <label class="form-label">N8N Webhook URL (Drive Scanner)</label>
+                <input type="text" class="form-input" id="webhook-url" placeholder="https://n8n.srv1087885.hstgr.cloud/webhook/...">
+            </div>
+            <button class="btn-primary" onclick="startApp()">Avvia Version Picker</button>
         </div>
     </div>
 
-    <!-- Main App -->
     <div class="main-app" id="main-app">
         <div class="app-container">
-            <!-- Photo Section -->
-            <div class="photo-section" id="photo-section">
-                <!-- Content loaded dynamically -->
-            </div>
+            <div class="photo-section" id="photo-section"></div>
 
-            <!-- Controls Panel -->
             <div class="controls-panel">
                 <div class="controls-header">
-                    <div class="controls-title">Quality Check</div>
-                    <div class="controls-subtitle">Verifica e approva le foto AI</div>
+                    <div class="controls-title">Version Picker</div>
+                    <div class="controls-subtitle">Seleziona best FRONT e BACK</div>
                 </div>
-
                 <div class="controls-body">
                     <div class="control-section">
                         <div class="control-label">Informazioni Prodotto</div>
-                        <div class="info-grid" id="product-info">
-                            <!-- Loaded dynamically -->
-                        </div>
+                        <div class="info-grid" id="product-info"></div>
                     </div>
-
                     <div class="control-section">
-                        <div class="control-label">Versione Visualizzata</div>
-                        <div class="info-grid">
-                            <div class="info-row">
-                                <span class="info-key">Versione</span>
-                                <span class="info-value" id="viewing-version">v1</span>
+                        <div class="control-label">Selezione Corrente</div>
+                        <div class="selection-summary" id="selection-summary">
+                            <div class="selection-row">
+                                <span class="selection-label front">FRONT</span>
+                                <span class="selection-empty" id="sel-front-info">Click su un'immagine</span>
                             </div>
-                            <div class="info-row">
-                                <span class="info-key">Generazioni Tot.</span>
-                                <span class="info-value" id="total-versions">1</span>
+                            <div class="selection-row">
+                                <span class="selection-label back">BACK</span>
+                                <span class="selection-empty" id="sel-back-info">Click su un'immagine</span>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="control-section">
-                        <div class="control-label">Rigenerazione Selettiva</div>
-                        <div class="regen-options">
-                            <label class="regen-checkbox" id="regen-front-box" onclick="toggleRegenOption('front')">
-                                <input type="checkbox" id="regen-front">
-                                <span class="checkbox-indicator"></span>
-                                <span class="checkbox-label">Rigenera FRONT</span>
-                            </label>
-                            <label class="regen-checkbox" id="regen-back-box" onclick="toggleRegenOption('back')">
-                                <input type="checkbox" id="regen-back">
-                                <span class="checkbox-indicator"></span>
-                                <span class="checkbox-label">Rigenera BACK</span>
-                            </label>
+                        <div class="links-changed-badge" id="links-changed-badge">
+                            ⚠ Links diversi dai precedenti — descrizioni da rigenerare
                         </div>
+                    </div>
+                    <div class="control-section" id="desc-section" style="display:none;">
+                        <div class="control-label">Descrizione Esistente (Catawiki)</div>
+                        <div class="desc-preview" id="desc-preview"></div>
                     </div>
                 </div>
 
                 <div class="controls-footer">
-                    <button class="btn-approve" id="btn-approve" onclick="approvePhotos()">
-                        ✓ Approva Versione
+                    <button class="btn-approve" id="btn-approve" onclick="approveSelection()" disabled>
+                        ✓ Approva Selezione (A)
                     </button>
-                    <button class="btn-regenerate" id="btn-regenerate" onclick="triggerRegeneration()" disabled>
-                        ↻ Rigenera Selezionate
+                    <button class="btn-reject" id="btn-reject" onclick="rejectProduct()">
+                        ✗ Reject — Nessuna Valida (R)
                     </button>
                     <button class="btn-defer" id="btn-defer" onclick="deferProduct()">
-                        ⏸ Scarta per Check
+                        ⏸ Scarta per Check (D)
                     </button>
                     <button class="btn-skip" onclick="skipProduct()">
                         Salta Prodotto →
@@ -1144,800 +475,661 @@
 
                 <div class="keyboard-hints">
                     <div class="hint"><kbd>A</kbd> Approva</div>
-                    <div class="hint"><kbd>R</kbd> Rigenera</div>
+                    <div class="hint"><kbd>R</kbd> Reject</div>
                     <div class="hint"><kbd>D</kbd> Scarta</div>
                     <div class="hint"><kbd>→</kbd> Salta</div>
-                    <div class="hint"><kbd>1-9</kbd> Versione</div>
-                </div>
-
-                <!-- Deferred List -->
-                <div class="deferred-section" id="deferred-section">
-                    <div class="deferred-header" onclick="toggleDeferredList()">
-                        <div class="deferred-title">
-                            <span>⏸ Check Secondario</span>
-                            <span class="deferred-count" id="deferred-count">0</span>
-                        </div>
-                        <span class="deferred-toggle">▼</span>
-                    </div>
-                    <div class="deferred-list" id="deferred-list">
-                        <div class="deferred-empty">Nessun SKU scartato</div>
-                    </div>
+                    <div class="hint"><kbd>Click</kbd> Seleziona Front/Back</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal -->
     <div class="modal" id="modal" onclick="closeModal()">
-        <span class="modal-close">×</span>
+        <span class="modal-close">&times;</span>
         <img id="modal-img" src="" alt="Full size">
+        <div class="modal-res-info" id="modal-res-info"></div>
     </div>
 
-    <!-- Toast -->
     <div class="toast" id="toast"></div>
 
     <script>
-        // Configuration - DirtyTag 3.0
-        const BASE_ID = 'apptD8GSxN3vhhivI';
-        const INVENTARIO_TABLE = 'tblddAcLcQAyk050u';
-        
-        let API_KEY = '';
-        let allRecords = [];
-        let pendingRecords = [];
-        let deferredRecords = []; // NEW: Lista SKU scartati per check secondario
-        let currentRecord = null;
-        let currentVersions = [];
-        let selectedVersion = null;
-        let stats = { pending: 0, approved: 0, regenerated: 0, deferred: 0 };
+    // ═══════════════════════════════════════════════════════════
+    // CONFIG
+    // ═══════════════════════════════════════════════════════════
+    const BASE_ID = 'apptD8GSxN3vhhivI';
+    const INVENTARIO_TABLE = 'tblddAcLcQAyk050u';
+    const MIN_SIDE = 900;
 
-        // Init
-        window.onload = function() {
-            const savedKey = localStorage.getItem('dirtytag_api_key_v3');
-            if (savedKey) {
-                document.getElementById('api-key').value = savedKey;
-            }
-            
-            // Load deferred list from localStorage
-            const savedDeferred = localStorage.getItem('dirtytag_deferred_list');
-            if (savedDeferred) {
-                try {
-                    deferredRecords = JSON.parse(savedDeferred);
-                    stats.deferred = deferredRecords.length;
-                } catch (e) {
-                    deferredRecords = [];
-                }
-            }
-        };
+    let API_KEY = '';
+    let WEBHOOK_URL = '';
+    let pendingRecords = [];
+    let currentRecord = null;
+    let driveVersions = [];    // All images from Drive scan
+    let selectedFront = null;  // { fileId, name, width, height, directUrl, thumbnailUrl }
+    let selectedBack = null;
+    let hideBelow = true;
+    let stats = { pending: 0, approved: 0, rejected: 0, deferred: 0 };
+    let deferredRecords = [];
 
-        function startApp() {
-            const key = document.getElementById('api-key').value.trim();
-            if (!key) {
-                showToast('Inserisci la chiave API', 'error');
-                return;
-            }
-            API_KEY = key;
-            localStorage.setItem('dirtytag_api_key_v3', key);
-            
-            document.getElementById('login-panel').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            document.getElementById('sku-display').style.display = 'flex';
-            document.getElementById('header-stats').style.display = 'flex';
-            
-            loadPendingRecords();
+    // ═══════════════════════════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════════════════════════
+    window.onload = function() {
+        const savedKey = localStorage.getItem('dirtytag_api_key_vp');
+        if (savedKey) document.getElementById('api-key').value = savedKey;
+        const savedWebhook = localStorage.getItem('dirtytag_webhook_vp');
+        if (savedWebhook) document.getElementById('webhook-url').value = savedWebhook;
+        const savedDeferred = localStorage.getItem('dirtytag_deferred_vp');
+        if (savedDeferred) {
+            try { deferredRecords = JSON.parse(savedDeferred); stats.deferred = deferredRecords.length; } catch(e) {}
         }
+    };
 
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast ${type} show`;
-            setTimeout(() => toast.className = 'toast', 2500);
-        }
+    function startApp() {
+        const key = document.getElementById('api-key').value.trim();
+        const webhook = document.getElementById('webhook-url').value.trim();
+        if (!key) { showToast('Inserisci la chiave API', 'error'); return; }
+        API_KEY = key;
+        WEBHOOK_URL = webhook;
+        localStorage.setItem('dirtytag_api_key_vp', key);
+        if (webhook) localStorage.setItem('dirtytag_webhook_vp', webhook);
 
-        async function apiRequest(table, options = {}) {
-            let url = `https://api.airtable.com/v0/${BASE_ID}/${table}`;
-            
-            if (options.recordId) {
-                url += `/${options.recordId}`;
-            }
-            
-            const params = new URLSearchParams();
-            if (options.filterByFormula) {
-                params.append('filterByFormula', options.filterByFormula);
-            }
-            if (options.sort) {
-                options.sort.forEach((s, i) => {
-                    params.append(`sort[${i}][field]`, s.field);
-                    params.append(`sort[${i}][direction]`, s.direction || 'asc');
+        document.getElementById('login-panel').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        document.getElementById('sku-display').style.display = 'flex';
+        document.getElementById('header-stats').style.display = 'flex';
+        loadPendingRecords();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // AIRTABLE API
+    // ═══════════════════════════════════════════════════════════
+    async function apiRequest(table, options = {}) {
+        let url = `https://api.airtable.com/v0/${BASE_ID}/${table}`;
+        if (options.recordId) url += `/${options.recordId}`;
+
+        const params = new URLSearchParams();
+        if (options.filterByFormula) params.append('filterByFormula', options.filterByFormula);
+        if (options.fields) options.fields.forEach(f => params.append('fields[]', f));
+        if (options.sort) options.sort.forEach((s, i) => {
+            params.append(`sort[${i}][field]`, s.field);
+            params.append(`sort[${i}][direction]`, s.direction || 'asc');
+        });
+        if (options.offset) params.append('offset', options.offset);
+        const qs = params.toString();
+        if (qs) url += `?${qs}`;
+
+        const fetchOpts = { headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' } };
+        if (options.method) fetchOpts.method = options.method;
+        if (options.body) fetchOpts.body = JSON.stringify(options.body);
+
+        const resp = await fetch(url, fetchOpts);
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(`API ${resp.status}: ${JSON.stringify(data.error || data)}`);
+        return data;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // LOAD RECORDS
+    // ═══════════════════════════════════════════════════════════
+    async function loadPendingRecords() {
+        showLoading('Caricamento recovery records...');
+        try {
+            let allRecs = [];
+            let offset = null;
+            // Recovery records: PENDING + Legacy flag
+            const formula = "AND({AI_Quality_Check} = 'PENDING', {Legacy_AI_Recovery} = TRUE())";
+            do {
+                const data = await apiRequest(INVENTARIO_TABLE, {
+                    filterByFormula: formula,
+                    fields: [
+                        'SKU', 'Brand_TXT', 'Category', 'Product_Status',
+                        'AI_Front_Image_Link', 'AI_Back_Image_Link',
+                        'RAW_Front_URL', 'RAW_Back_URL', 'RAW_FolderID',
+                        'Catawiki_Description', 'Vinted_Description',
+                        'Legacy_AI_Recovery', 'AI_Mode_Selected',
+                        'rawID_FRONT', 'rawID_BACK'
+                    ],
+                    sort: [{ field: 'SKU', direction: 'asc' }],
+                    offset
                 });
-            }
-            if (options.offset) {
-                params.append('offset', options.offset);
-            }
-            
-            const queryString = params.toString();
-            if (queryString) {
-                url += `?${queryString}`;
-            }
+                allRecs = allRecs.concat(data.records);
+                offset = data.offset;
+            } while (offset);
 
-            const fetchOptions = {
-                headers: {
-                    'Authorization': `Bearer ${API_KEY}`,
-                    'Content-Type': 'application/json'
-                }
+            pendingRecords = allRecs;
+            stats.pending = pendingRecords.length;
+            updateStatsUI();
+            showToast(`${pendingRecords.length} recovery records caricati`, 'info');
+            loadNextProduct();
+        } catch (error) {
+            showError(error.message);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // LOAD NEXT PRODUCT
+    // ═══════════════════════════════════════════════════════════
+    function loadNextProduct() {
+        selectedFront = null;
+        selectedBack = null;
+        driveVersions = [];
+        updateSelectionUI();
+
+        if (pendingRecords.length === 0) { showEmptyState(); return; }
+
+        currentRecord = pendingRecords[0];
+        const f = currentRecord.fields;
+        document.getElementById('current-sku').textContent = f.SKU || '—';
+        renderProductInfo(f);
+        renderDescPreview(f);
+
+        // If we have a webhook, scan Drive for versions
+        if (WEBHOOK_URL && f.RAW_FolderID) {
+            scanDriveVersions(f.SKU, f.RAW_FolderID, f);
+        } else {
+            // Fallback: use existing links as the only "versions"
+            buildFallbackVersions(f);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // DRIVE SCAN via N8N WEBHOOK
+    // ═══════════════════════════════════════════════════════════
+    async function scanDriveVersions(sku, folderId, fields) {
+        showLoading(`Scansione Drive per ${sku}...`);
+        try {
+            const resp = await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sku, folderId })
+            });
+            if (!resp.ok) throw new Error(`Webhook ${resp.status}`);
+            const data = await resp.json();
+
+            driveVersions = (data.versions || []).map(v => ({
+                ...v,
+                minSide: Math.min(v.width || 0, v.height || 0),
+                meetsMinimum: Math.min(v.width || 0, v.height || 0) >= MIN_SIDE
+            }));
+
+            // Also include existing links if not found in Drive scan
+            addExistingLinksIfMissing(fields);
+
+            renderPhotoSection(fields);
+        } catch (error) {
+            console.warn('Drive scan failed, using fallback:', error.message);
+            showToast(`Drive scan fallito: ${error.message}. Uso links esistenti.`, 'warning');
+            buildFallbackVersions(fields);
+        }
+    }
+
+    function addExistingLinksIfMissing(fields) {
+        const existingFrontId = extractDriveFileId(fields.AI_Front_Image_Link);
+        const existingBackId = extractDriveFileId(fields.AI_Back_Image_Link);
+        const foundIds = new Set(driveVersions.map(v => v.fileId));
+
+        if (existingFrontId && !foundIds.has(existingFrontId)) {
+            driveVersions.unshift({
+                fileId: existingFrontId,
+                name: 'Current FRONT (Airtable)',
+                version: 'current',
+                width: 0, height: 0, minSide: 0, meetsMinimum: true, // unknown, assume ok
+                thumbnailUrl: `https://drive.google.com/thumbnail?id=${existingFrontId}&sz=w400`,
+                directUrl: fields.AI_Front_Image_Link,
+                inferredType: 'FRONT'
+            });
+        }
+        if (existingBackId && !foundIds.has(existingBackId)) {
+            driveVersions.unshift({
+                fileId: existingBackId,
+                name: 'Current BACK (Airtable)',
+                version: 'current',
+                width: 0, height: 0, minSide: 0, meetsMinimum: true,
+                thumbnailUrl: `https://drive.google.com/thumbnail?id=${existingBackId}&sz=w400`,
+                directUrl: fields.AI_Back_Image_Link,
+                inferredType: 'BACK'
+            });
+        }
+    }
+
+    function buildFallbackVersions(fields) {
+        // No webhook — use existing Airtable links as sole versions
+        driveVersions = [];
+        const frontId = extractDriveFileId(fields.AI_Front_Image_Link);
+        const backId = extractDriveFileId(fields.AI_Back_Image_Link);
+
+        if (frontId) {
+            driveVersions.push({
+                fileId: frontId, name: 'AI_FRONT (current)', version: 'current',
+                width: 0, height: 0, minSide: 0, meetsMinimum: true,
+                thumbnailUrl: `https://drive.google.com/thumbnail?id=${frontId}&sz=w400`,
+                directUrl: fields.AI_Front_Image_Link,
+                inferredType: 'FRONT'
+            });
+        }
+        if (backId) {
+            driveVersions.push({
+                fileId: backId, name: 'AI_BACK (current)', version: 'current',
+                width: 0, height: 0, minSide: 0, meetsMinimum: true,
+                thumbnailUrl: `https://drive.google.com/thumbnail?id=${backId}&sz=w400`,
+                directUrl: fields.AI_Back_Image_Link,
+                inferredType: 'BACK'
+            });
+        }
+
+        renderPhotoSection(fields);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // RENDER
+    // ═══════════════════════════════════════════════════════════
+    function renderProductInfo(fields) {
+        document.getElementById('product-info').innerHTML = `
+            <div class="info-row"><span class="info-key">Brand</span><span class="info-value">${fields.Brand_TXT || '—'}</span></div>
+            <div class="info-row"><span class="info-key">Categoria</span><span class="info-value">${fields.Category || '—'}</span></div>
+            <div class="info-row"><span class="info-key">AI Mode</span><span class="info-value">${fields.AI_Mode_Selected || 'MANI'}</span></div>
+            <div class="info-row"><span class="info-key">Versioni trovate</span><span class="info-value">${driveVersions.length} (${driveVersions.filter(v => v.meetsMinimum).length} ≥900px)</span></div>
+        `;
+    }
+
+    function renderDescPreview(fields) {
+        const desc = fields.Catawiki_Description || '';
+        const section = document.getElementById('desc-section');
+        if (desc) {
+            section.style.display = 'block';
+            document.getElementById('desc-preview').innerHTML = `
+                <div class="desc-title">Catawiki</div>
+                ${desc.substring(0, 300)}${desc.length > 300 ? '...' : ''}
+            `;
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    function renderPhotoSection(fields) {
+        const container = document.getElementById('photo-section');
+        const rawFrontId = extractDriveFileId(fields.RAW_Front_URL);
+        const rawBackId = extractDriveFileId(fields.RAW_Back_URL);
+
+        // Group versions by folder/version
+        const groups = {};
+        driveVersions.forEach(v => {
+            const g = v.version || 'root';
+            if (!groups[g]) groups[g] = [];
+            groups[g].push(v);
+        });
+
+        // Sort groups: current first, then v descending, DISCARDED last
+        const sortedGroupKeys = Object.keys(groups).sort((a, b) => {
+            if (a === 'current') return -1;
+            if (b === 'current') return 1;
+            if (a === 'DISCARDED') return 1;
+            if (b === 'DISCARDED') return -1;
+            return b.localeCompare(a);
+        });
+
+        let versionsHTML = '';
+        sortedGroupKeys.forEach(gKey => {
+            const isDiscarded = gKey === 'DISCARDED';
+            versionsHTML += `
+                <div class="version-group">
+                    <div class="version-group-header ${isDiscarded ? 'discarded' : ''}">${gKey === 'current' ? '◆ Links Attuali' : gKey === 'DISCARDED' ? '✗ Scartate' : `◆ ${gKey}`}</div>
+                    <div class="version-images">
+                        ${groups[gKey].map(v => renderVersionCard(v)).join('')}
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = `
+            <div class="raw-reference">
+                <div class="raw-header">
+                    <span class="raw-title">◆ RAW Originali</span>
+                    <span style="font-size:0.6rem; color:var(--text-muted);">Riferimento</span>
+                </div>
+                <div class="raw-photos">
+                    <div class="raw-photo-slot">
+                        <span class="slot-label">Front</span>
+                        <div class="raw-img-container" onclick="openModal('${rawFrontId ? `https://drive.google.com/thumbnail?id=${rawFrontId}&sz=w1200` : ''}', '')">
+                            ${rawFrontId ? `<img src="https://drive.google.com/thumbnail?id=${rawFrontId}&sz=w400" alt="RAW Front">` : '<div class="photo-placeholder">N/A</div>'}
+                        </div>
+                    </div>
+                    <div class="raw-photo-slot">
+                        <span class="slot-label">Back</span>
+                        <div class="raw-img-container" onclick="openModal('${rawBackId ? `https://drive.google.com/thumbnail?id=${rawBackId}&sz=w1200` : ''}', '')">
+                            ${rawBackId ? `<img src="https://drive.google.com/thumbnail?id=${rawBackId}&sz=w400" alt="RAW Back">` : '<div class="photo-placeholder">N/A</div>'}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="versions-container">
+                <div class="versions-header">
+                    <span class="versions-title">↳ Versioni AI Trovate</span>
+                    <div class="versions-meta">
+                        <span class="versions-meta-item"><strong>${driveVersions.length}</strong> totali</span>
+                        <span class="versions-meta-item"><strong>${driveVersions.filter(v => v.meetsMinimum).length}</strong> ≥900px</span>
+                    </div>
+                </div>
+                <div class="filter-bar">
+                    <label class="filter-toggle">
+                        <input type="checkbox" id="hide-below-toggle" ${hideBelow ? 'checked' : ''} onchange="toggleHideBelow()">
+                        <span class="filter-indicator"></span>
+                        <span>Nascondi &lt; ${MIN_SIDE}px</span>
+                    </label>
+                </div>
+                ${versionsHTML || '<div style="padding:40px;text-align:center;color:var(--text-muted);font-size:0.75rem;">Nessuna versione AI trovata</div>'}
+            </div>
+        `;
+    }
+
+    function renderVersionCard(v) {
+        const isFront = selectedFront && selectedFront.fileId === v.fileId;
+        const isBack = selectedBack && selectedBack.fileId === v.fileId;
+        const belowClass = !v.meetsMinimum ? (hideBelow ? 'below-min hidden' : 'below-min') : '';
+        const selClass = isFront ? 'selected-front' : (isBack ? 'selected-back' : '');
+        const resClass = v.meetsMinimum ? 'ok' : 'low';
+        const resText = (v.width && v.height) ? `${v.width}×${v.height}` : '?×?';
+        const typeClass = v.inferredType === 'FRONT' ? 'front' : (v.inferredType === 'BACK' ? 'back' : 'unknown');
+
+        const thumbUrl = v.thumbnailUrl || `https://drive.google.com/thumbnail?id=${v.fileId}&sz=w400`;
+        const fullUrl = `https://drive.google.com/thumbnail?id=${v.fileId}&sz=w1200`;
+
+        return `
+            <div class="version-card ${selClass} ${belowClass}" data-fileid="${v.fileId}">
+                <div class="version-card-img" onclick="openModal('${fullUrl}', '${resText}')">
+                    <img src="${thumbUrl}" alt="${v.name}" loading="lazy">
+                    <span class="version-card-type ${typeClass}">${v.inferredType || '?'}</span>
+                    ${isFront ? '<span class="selection-badge front-sel">✓ FRONT</span>' : ''}
+                    ${isBack ? '<span class="selection-badge back-sel">✓ BACK</span>' : ''}
+                </div>
+                <div class="version-card-info">
+                    <span class="version-card-name" title="${v.name}">${v.name}</span>
+                    <span class="version-card-res ${resClass}">${resText}</span>
+                </div>
+                <div style="display:flex;border-top:1px solid var(--border);">
+                    <button onclick="event.stopPropagation(); selectAs('front', '${v.fileId}')" style="flex:1;background:${isFront ? 'var(--accent-green-dim)' : 'var(--bg-tertiary)'};border:none;padding:6px;color:${isFront ? 'var(--accent-green)' : 'var(--text-muted)'};font-family:inherit;font-size:0.6rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;border-right:1px solid var(--border);">
+                        ${isFront ? '✓ ' : ''}Front
+                    </button>
+                    <button onclick="event.stopPropagation(); selectAs('back', '${v.fileId}')" style="flex:1;background:${isBack ? 'var(--accent-blue-dim)' : 'var(--bg-tertiary)'};border:none;padding:6px;color:${isBack ? 'var(--accent-blue)' : 'var(--text-muted)'};font-family:inherit;font-size:0.6rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;">
+                        ${isBack ? '✓ ' : ''}Back
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // SELECTION LOGIC
+    // ═══════════════════════════════════════════════════════════
+    function selectAs(type, fileId) {
+        const version = driveVersions.find(v => v.fileId === fileId);
+        if (!version) return;
+
+        // If same image was already selected as the other type, deselect that
+        if (type === 'front') {
+            if (selectedBack && selectedBack.fileId === fileId) selectedBack = null;
+            selectedFront = (selectedFront && selectedFront.fileId === fileId) ? null : version;
+        } else {
+            if (selectedFront && selectedFront.fileId === fileId) selectedFront = null;
+            selectedBack = (selectedBack && selectedBack.fileId === fileId) ? null : version;
+        }
+
+        updateSelectionUI();
+        renderPhotoSection(currentRecord.fields);
+    }
+
+    function updateSelectionUI() {
+        // Front info
+        const frontInfo = document.getElementById('sel-front-info');
+        if (selectedFront) {
+            const resClass = selectedFront.meetsMinimum ? 'ok' : 'low';
+            const resText = (selectedFront.width && selectedFront.height) ? `${selectedFront.width}×${selectedFront.height}` : '?';
+            frontInfo.innerHTML = `<span class="selection-detail">${selectedFront.name} — <span class="res ${resClass}">${resText}</span></span>`;
+            frontInfo.classList.remove('selection-empty');
+        } else {
+            frontInfo.innerHTML = "Click su un'immagine";
+            frontInfo.classList.add('selection-empty');
+        }
+
+        // Back info
+        const backInfo = document.getElementById('sel-back-info');
+        if (selectedBack) {
+            const resClass = selectedBack.meetsMinimum ? 'ok' : 'low';
+            const resText = (selectedBack.width && selectedBack.height) ? `${selectedBack.width}×${selectedBack.height}` : '?';
+            backInfo.innerHTML = `<span class="selection-detail">${selectedBack.name} — <span class="res ${resClass}">${resText}</span></span>`;
+            backInfo.classList.remove('selection-empty');
+        } else {
+            backInfo.innerHTML = "Click su un'immagine";
+            backInfo.classList.add('selection-empty');
+        }
+
+        // Enable/disable approve
+        const btn = document.getElementById('btn-approve');
+        btn.disabled = !(selectedFront && selectedBack);
+
+        // Check if links changed
+        checkLinksChanged();
+    }
+
+    function checkLinksChanged() {
+        if (!currentRecord) return;
+        const f = currentRecord.fields;
+        const oldFrontId = extractDriveFileId(f.AI_Front_Image_Link);
+        const oldBackId = extractDriveFileId(f.AI_Back_Image_Link);
+        const newFrontId = selectedFront ? selectedFront.fileId : null;
+        const newBackId = selectedBack ? selectedBack.fileId : null;
+
+        const changed = (newFrontId && newFrontId !== oldFrontId) || (newBackId && newBackId !== oldBackId);
+        document.getElementById('links-changed-badge').classList.toggle('visible', changed);
+    }
+
+    function toggleHideBelow() {
+        hideBelow = document.getElementById('hide-below-toggle').checked;
+        renderPhotoSection(currentRecord.fields);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // ACTIONS
+    // ═══════════════════════════════════════════════════════════
+    async function approveSelection() {
+        if (!currentRecord || !selectedFront || !selectedBack) return;
+        const btn = document.getElementById('btn-approve');
+        btn.disabled = true;
+        btn.textContent = 'Salvataggio...';
+
+        try {
+            const f = currentRecord.fields;
+            const oldFrontId = extractDriveFileId(f.AI_Front_Image_Link);
+            const oldBackId = extractDriveFileId(f.AI_Back_Image_Link);
+            const linksChanged = (selectedFront.fileId !== oldFrontId) || (selectedBack.fileId !== oldBackId);
+
+            const newFrontUrl = selectedFront.directUrl || `https://drive.google.com/uc?id=${selectedFront.fileId}&export=download`;
+            const newBackUrl = selectedBack.directUrl || `https://drive.google.com/uc?id=${selectedBack.fileId}&export=download`;
+
+            const updateFields = {
+                'AI_Front_Image_Link': newFrontUrl,
+                'AI_Back_Image_Link': newBackUrl,
+                'AI_Quality_Check': { name: 'APPROVED' }
             };
 
-            if (options.method) {
-                fetchOptions.method = options.method;
-            }
-            if (options.body) {
-                fetchOptions.body = JSON.stringify(options.body);
-            }
-
-            const response = await fetch(url, fetchOptions);
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(`API Error: ${response.status} - ${JSON.stringify(data.error || data)}`);
+            // If links changed and descriptions exist, flag for re-generation
+            if (linksChanged && f.Catawiki_Description) {
+                // Clear descriptions so W4 regenerates them
+                updateFields['Catawiki_Description'] = '';
+                updateFields['Vinted_Description'] = '';
             }
 
-            return data;
-        }
-
-        async function loadPendingRecords() {
-            showLoading('Caricamento prodotti in attesa di QC...');
-
-            try {
-                allRecords = [];
-                let offset = null;
-                
-                // Filter: AI_Quality_Check = PENDING
-                const formula = "{AI_Quality_Check} = 'PENDING'";
-                
-                do {
-                    const data = await apiRequest(INVENTARIO_TABLE, { 
-                        filterByFormula: formula,
-                        sort: [{ field: 'SKU', direction: 'asc' }],
-                        offset 
-                    });
-                    allRecords = allRecords.concat(data.records);
-                    offset = data.offset;
-                } while (offset);
-
-                pendingRecords = allRecords;
-                stats.pending = pendingRecords.length;
-                updateStatsUI();
-                updateDeferredListUI();
-                
-                loadNextProduct();
-
-            } catch (error) {
-                showError(error.message);
-            }
-        }
-
-        function updateStatsUI() {
-            document.getElementById('stat-pending').textContent = stats.pending;
-            document.getElementById('stat-approved').textContent = stats.approved;
-            document.getElementById('stat-regen').textContent = stats.regenerated;
-            document.getElementById('stat-deferred').textContent = stats.deferred;
-            document.getElementById('deferred-count').textContent = stats.deferred;
-            
-            const total = stats.pending + stats.approved + stats.regenerated + stats.deferred;
-            const progress = total > 0 ? ((stats.approved + stats.regenerated) / total) * 100 : 0;
-            document.getElementById('progress-fill').style.width = `${progress}%`;
-            document.getElementById('progress-text').textContent = `${Math.round(progress)}% completato`;
-        }
-
-        function loadNextProduct() {
-            // Reset UI
-            document.getElementById('regen-front').checked = false;
-            document.getElementById('regen-back').checked = false;
-            document.getElementById('regen-front-box').classList.remove('checked');
-            document.getElementById('regen-back-box').classList.remove('checked');
-            updateRegenButton();
-
-            if (pendingRecords.length === 0) {
-                showEmptyState();
-                return;
-            }
-
-            currentRecord = pendingRecords[0];
-            const fields = currentRecord.fields;
-            
-            document.getElementById('current-sku').textContent = fields.SKU || '—';
-            
-            // Load product info
-            renderProductInfo(fields);
-            
-            // Build version structure and render photos
-            buildVersionsAndRender(fields);
-        }
-
-        function renderProductInfo(fields) {
-            const container = document.getElementById('product-info');
-            container.innerHTML = `
-                <div class="info-row">
-                    <span class="info-key">Brand</span>
-                    <span class="info-value">${fields.Brand || '—'}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-key">Categoria</span>
-                    <span class="info-value">${fields.Category || '—'}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-key">AI Mode</span>
-                    <span class="info-value">${fields.AI_Mode_Selected || 'MANI'}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-key">Status</span>
-                    <span class="info-value">${fields.AI_Status || '—'}</span>
-                </div>
-            `;
-        }
-
-        function buildVersionsAndRender(fields) {
-            const sku = fields.SKU;
-            const folderUrl = fields.RAW_Folder_URL || '';
-            const folderId = fields.RAW_FolderID || '';
-            const regenCount = fields.AI_Regeneration_Count || 1;
-            
-            // Current AI photo links
-            const aiFrontLink = fields.AI_Front_Image_Link || '';
-            const aiBackLink = fields.AI_Back_Image_Link || '';
-            
-            // Build versions array
-            currentVersions = [];
-            for (let i = 1; i <= regenCount; i++) {
-                currentVersions.push({
-                    version: i,
-                    label: `v${i}`,
-                    isCurrent: i === regenCount,
-                    frontUrl: i === regenCount ? aiFrontLink : null,
-                    backUrl: i === regenCount ? aiBackLink : null
-                });
-            }
-            
-            // Select latest version by default
-            selectedVersion = currentVersions.length > 0 ? currentVersions[currentVersions.length - 1] : null;
-            
-            document.getElementById('viewing-version').textContent = selectedVersion ? selectedVersion.label : '—';
-            document.getElementById('total-versions').textContent = regenCount;
-            
-            renderPhotoSection(fields);
-        }
-
-        function renderPhotoSection(fields) {
-            const container = document.getElementById('photo-section');
-            const sku = fields.SKU;
-            
-            const folderId = fields.RAW_FolderID || '';
-            
-            // Current AI photos
-            const aiFront = selectedVersion?.frontUrl || '';
-            const aiBack = selectedVersion?.backUrl || '';
-            
-            // Extract file IDs from Google Drive links if possible
-            const aiFrontId = extractDriveFileId(aiFront);
-            const aiBackId = extractDriveFileId(aiBack);
-            
-            const rawFrontUrl = fields.RAW_Front_URL || '';
-            const rawBackUrl = fields.RAW_Back_URL || '';
-            const rawFrontId = extractDriveFileId(rawFrontUrl);
-            const rawBackId = extractDriveFileId(rawBackUrl);
-
-            container.innerHTML = `
-                <div class="comparison-grid">
-                    <!-- RAW Column -->
-                    <div class="comparison-column">
-                        <div class="column-header">
-                            <span class="column-title raw">◆ RAW Originali</span>
-                            <span class="column-badge">Input</span>
-                        </div>
-                        <div class="photo-pair">
-                            <div class="photo-slot">
-                                <span class="photo-slot-label front">Front</span>
-                                <div class="photo-image-container" onclick="openModal('${rawFrontId ? `https://drive.google.com/thumbnail?id=${rawFrontId}&sz=w1200` : ''}')">
-                                    ${rawFrontId 
-                                        ? `<img src="https://drive.google.com/thumbnail?id=${rawFrontId}&sz=w600" alt="RAW Front">` 
-                                        : `<div class="photo-placeholder">RAW non disponibile</div>`
-                                    }
-                                </div>
-                            </div>
-                            <div class="photo-slot">
-                                <span class="photo-slot-label back">Back</span>
-                                <div class="photo-image-container" onclick="openModal('${rawBackId ? `https://drive.google.com/thumbnail?id=${rawBackId}&sz=w1200` : ''}')">
-                                    ${rawBackId 
-                                        ? `<img src="https://drive.google.com/thumbnail?id=${rawBackId}&sz=w600" alt="RAW Back">` 
-                                        : `<div class="photo-placeholder">RAW non disponibile</div>`
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- AI Column -->
-                    <div class="comparison-column">
-                        <div class="column-header">
-                            <span class="column-title ai">◆ AI Generated</span>
-                            <span class="column-badge">${selectedVersion?.label || 'v?'}</span>
-                        </div>
-                        <div class="photo-pair">
-                            <div class="photo-slot">
-                                <span class="photo-slot-label front">Front</span>
-                                <div class="photo-image-container" onclick="openModal('${aiFrontId ? `https://drive.google.com/thumbnail?id=${aiFrontId}&sz=w1200` : ''}')">
-                                    ${aiFrontId 
-                                        ? `<img src="https://drive.google.com/thumbnail?id=${aiFrontId}&sz=w600" alt="AI Front">` 
-                                        : `<div class="photo-placeholder">AI non disponibile</div>`
-                                    }
-                                </div>
-                            </div>
-                            <div class="photo-slot">
-                                <span class="photo-slot-label back">Back</span>
-                                <div class="photo-image-container" onclick="openModal('${aiBackId ? `https://drive.google.com/thumbnail?id=${aiBackId}&sz=w1200` : ''}')">
-                                    ${aiBackId 
-                                        ? `<img src="https://drive.google.com/thumbnail?id=${aiBackId}&sz=w600" alt="AI Back">` 
-                                        : `<div class="photo-placeholder">AI non disponibile</div>`
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Version History -->
-                <div class="version-section">
-                    <div class="version-header">
-                        <span class="version-title">↳ Storico Versioni</span>
-                        <span class="column-badge">${currentVersions.length} versioni</span>
-                    </div>
-                    ${renderVersionHistory(aiFrontId, aiBackId)}
-                </div>
-            `;
-        }
-
-        function renderVersionHistory(currentFrontId, currentBackId) {
-            if (currentVersions.length === 0) {
-                return '<div class="no-versions">Nessuna versione disponibile</div>';
-            }
-
-            let html = '<div class="version-grid">';
-            
-            currentVersions.forEach((v, index) => {
-                const isSelected = selectedVersion && selectedVersion.version === v.version;
-                const isCurrent = v.isCurrent;
-                
-                const frontId = isCurrent ? currentFrontId : null;
-                const backId = isCurrent ? currentBackId : null;
-                
-                html += `
-                    <div class="version-card ${isSelected ? 'selected' : ''} ${isCurrent ? 'current' : ''}" 
-                         onclick="selectVersion(${v.version})" 
-                         data-version="${v.version}">
-                        <div class="version-card-header">
-                            <span class="version-number">${v.label}</span>
-                            ${isCurrent ? '<span class="version-tag current">Ultima</span>' : ''}
-                            ${isSelected && !isCurrent ? '<span class="version-tag selected">Selezionata</span>' : ''}
-                        </div>
-                        <div class="version-thumbs">
-                            <div class="version-thumb">
-                                ${frontId 
-                                    ? `<img src="https://drive.google.com/thumbnail?id=${frontId}&sz=w200" alt="Front">` 
-                                    : `<div class="photo-placeholder" style="position:absolute;top:0;left:0;width:100%;height:100%;">F</div>`
-                                }
-                            </div>
-                            <div class="version-thumb">
-                                ${backId 
-                                    ? `<img src="https://drive.google.com/thumbnail?id=${backId}&sz=w200" alt="Back">` 
-                                    : `<div class="photo-placeholder" style="position:absolute;top:0;left:0;width:100%;height:100%;">B</div>`
-                                }
-                            </div>
-                        </div>
-                    </div>
-                `;
+            await apiRequest(INVENTARIO_TABLE, {
+                recordId: currentRecord.id,
+                method: 'PATCH',
+                body: { fields: updateFields }
             });
-            
-            html += '</div>';
-            return html;
-        }
-
-        function selectVersion(versionNum) {
-            const version = currentVersions.find(v => v.version === versionNum);
-            if (version) {
-                selectedVersion = version;
-                document.getElementById('viewing-version').textContent = version.label;
-                renderPhotoSection(currentRecord.fields);
-            }
-        }
-
-        function extractDriveFileId(url) {
-            if (!url) return null;
-            
-            const match1 = url.match(/\/file\/d\/([^\/]+)/);
-            if (match1) return match1[1];
-            
-            const match2 = url.match(/[?&]id=([^&]+)/);
-            if (match2) return match2[1];
-            
-            const match3 = url.match(/thumbnail\?id=([^&]+)/);
-            if (match3) return match3[1];
-            
-            if (url.match(/^[a-zA-Z0-9_-]{25,}$/)) return url;
-            
-            return null;
-        }
-
-        function toggleRegenOption(type) {
-            const checkbox = document.getElementById(`regen-${type}`);
-            const box = document.getElementById(`regen-${type}-box`);
-            
-            checkbox.checked = !checkbox.checked;
-            box.classList.toggle('checked', checkbox.checked);
-            
-            updateRegenButton();
-        }
-
-        function updateRegenButton() {
-            const frontChecked = document.getElementById('regen-front').checked;
-            const backChecked = document.getElementById('regen-back').checked;
-            const btn = document.getElementById('btn-regenerate');
-            
-            btn.disabled = !frontChecked && !backChecked;
-            
-            if (frontChecked && backChecked) {
-                btn.textContent = '↻ Rigenera Entrambe';
-            } else if (frontChecked) {
-                btn.textContent = '↻ Rigenera FRONT';
-            } else if (backChecked) {
-                btn.textContent = '↻ Rigenera BACK';
-            } else {
-                btn.textContent = '↻ Rigenera Selezionate';
-            }
-        }
-
-        async function approvePhotos() {
-            if (!currentRecord) return;
-            
-            const btn = document.getElementById('btn-approve');
-            btn.disabled = true;
-            btn.textContent = 'Approvazione...';
-
-            try {
-                await apiRequest(INVENTARIO_TABLE, {
-                    recordId: currentRecord.id,
-                    method: 'PATCH',
-                    body: {
-                        fields: {
-                            'AI_Quality_Check': 'APPROVED',
-                            'AI_Approved_Version': selectedVersion?.version || 1
-                        }
-                    }
-                });
-
-                const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
-                if (idx !== -1) {
-                    pendingRecords.splice(idx, 1);
-                }
-
-                stats.pending--;
-                stats.approved++;
-                updateStatsUI();
-
-                showToast(`${currentRecord.fields.SKU} approvato ✓`, 'success');
-                
-                btn.textContent = '✓ Approva Versione';
-                btn.disabled = false;
-                
-                loadNextProduct();
-
-            } catch (error) {
-                showToast(`Errore: ${error.message}`, 'error');
-                btn.disabled = false;
-                btn.textContent = '✓ Approva Versione';
-            }
-        }
-
-        async function triggerRegeneration() {
-            if (!currentRecord) return;
-            
-            const frontChecked = document.getElementById('regen-front').checked;
-            const backChecked = document.getElementById('regen-back').checked;
-            
-            if (!frontChecked && !backChecked) {
-                showToast('Seleziona almeno una foto da rigenerare', 'error');
-                return;
-            }
-
-            const btn = document.getElementById('btn-regenerate');
-            btn.disabled = true;
-            btn.textContent = 'Invio richiesta...';
-
-            try {
-                let regenScope = '';
-                if (frontChecked && backChecked) {
-                    regenScope = 'BOTH';
-                } else if (frontChecked) {
-                    regenScope = 'FRONT';
-                } else {
-                    regenScope = 'BACK';
-                }
-
-                // ⚠️ CRITICAL: Boolean fields MUST use integer 1/0 for Airtable
-                // Product_Status reset to RAW_PROCESSED to re-enter AI pipeline
-                // W3 will intercept AI_Regenerate_Trigger = 1 and regenerate
-                await apiRequest(INVENTARIO_TABLE, {
-                    recordId: currentRecord.id,
-                    method: 'PATCH',
-                    body: {
-                        fields: {
-                            'AI_Quality_Check': 'REJECTED',
-                            'AI_Regenerate_Trigger': 1,  // ✅ Integer, not boolean
-                            'AI_Regen_Scope': regenScope,
-                            'Product_Status': 'RAW_PROCESSED'
-                        }
-                    }
-                });
-
-                const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
-                if (idx !== -1) {
-                    pendingRecords.splice(idx, 1);
-                }
-
-                stats.pending--;
-                stats.regenerated++;
-                updateStatsUI();
-
-                showToast(`${currentRecord.fields.SKU} → rigenerazione ${regenScope} richiesta`, 'info');
-                
-                btn.textContent = '↻ Rigenera Selezionate';
-                btn.disabled = true;
-                
-                loadNextProduct();
-
-            } catch (error) {
-                showToast(`Errore: ${error.message}`, 'error');
-                btn.disabled = false;
-                updateRegenButton();
-            }
-        }
-
-        // =====================================================
-        // DEFER PRODUCT - Scarta per Check Secondario
-        // =====================================================
-        async function deferProduct() {
-            if (!currentRecord) return;
-            
-            const btn = document.getElementById('btn-defer');
-            btn.disabled = true;
-            btn.textContent = 'Scarto in corso...';
-
-            try {
-                // Update Airtable: Set AI_Quality_Check = DEFERRED
-                await apiRequest(INVENTARIO_TABLE, {
-                    recordId: currentRecord.id,
-                    method: 'PATCH',
-                    body: {
-                        fields: {
-                            'AI_Quality_Check': 'DEFERRED'
-                        }
-                    }
-                });
-
-                // Add to deferred list
-                const deferredItem = {
-                    id: currentRecord.id,
-                    sku: currentRecord.fields.SKU,
-                    brand: currentRecord.fields.Brand || '—',
-                    timestamp: new Date().toISOString()
-                };
-                deferredRecords.push(deferredItem);
-                
-                // Save to localStorage
-                localStorage.setItem('dirtytag_deferred_list', JSON.stringify(deferredRecords));
-
-                // Remove from pending
-                const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
-                if (idx !== -1) {
-                    pendingRecords.splice(idx, 1);
-                }
-
-                stats.pending--;
-                stats.deferred++;
-                updateStatsUI();
-                updateDeferredListUI();
-
-                showToast(`${currentRecord.fields.SKU} scartato per check secondario ⏸`, 'warning');
-                
-                btn.textContent = '⏸ Scarta per Check';
-                btn.disabled = false;
-                
-                loadNextProduct();
-
-            } catch (error) {
-                showToast(`Errore: ${error.message}`, 'error');
-                btn.disabled = false;
-                btn.textContent = '⏸ Scarta per Check';
-            }
-        }
-
-        // Restore deferred product back to PENDING
-        async function restoreDeferredProduct(recordId, sku) {
-            try {
-                await apiRequest(INVENTARIO_TABLE, {
-                    recordId: recordId,
-                    method: 'PATCH',
-                    body: {
-                        fields: {
-                            'AI_Quality_Check': 'PENDING'
-                        }
-                    }
-                });
-
-                // Remove from deferred list
-                const idx = deferredRecords.findIndex(r => r.id === recordId);
-                if (idx !== -1) {
-                    deferredRecords.splice(idx, 1);
-                }
-                
-                // Save to localStorage
-                localStorage.setItem('dirtytag_deferred_list', JSON.stringify(deferredRecords));
-
-                stats.deferred--;
-                stats.pending++;
-                updateStatsUI();
-                updateDeferredListUI();
-
-                showToast(`${sku} ripristinato in coda ↺`, 'success');
-                
-                // Reload to include restored item
-                loadPendingRecords();
-
-            } catch (error) {
-                showToast(`Errore ripristino: ${error.message}`, 'error');
-            }
-        }
-
-        // Toggle deferred list visibility
-        function toggleDeferredList() {
-            const section = document.getElementById('deferred-section');
-            section.classList.toggle('expanded');
-        }
-
-        // Update deferred list UI
-        function updateDeferredListUI() {
-            const container = document.getElementById('deferred-list');
-            
-            if (deferredRecords.length === 0) {
-                container.innerHTML = '<div class="deferred-empty">Nessun SKU scartato</div>';
-                return;
-            }
-
-            let html = '';
-            deferredRecords.forEach(item => {
-                html += `
-                    <div class="deferred-item">
-                        <div>
-                            <span class="deferred-item-sku">${item.sku}</span>
-                            <span style="color: var(--text-muted); font-size: 0.65rem; margin-left: 8px;">${item.brand}</span>
-                        </div>
-                        <div class="deferred-item-actions">
-                            <button class="deferred-item-btn restore" onclick="restoreDeferredProduct('${item.id}', '${item.sku}')" title="Ripristina in coda">
-                                ↺ Ripristina
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-
-        function skipProduct() {
-            if (!currentRecord) return;
 
             const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
-            if (idx !== -1) {
-                const skipped = pendingRecords.splice(idx, 1)[0];
-                pendingRecords.push(skipped);
-            }
+            if (idx !== -1) pendingRecords.splice(idx, 1);
+            stats.pending--;
+            stats.approved++;
+            updateStatsUI();
 
-            showToast(`${currentRecord.fields.SKU} saltato`, 'info');
+            const extraMsg = linksChanged ? ' (desc da rigenerare)' : '';
+            showToast(`${f.SKU} approvato ✓${extraMsg}`, 'success');
+            btn.textContent = '✓ Approva Selezione (A)';
+            btn.disabled = false;
             loadNextProduct();
+        } catch (error) {
+            showToast(`Errore: ${error.message}`, 'error');
+            btn.disabled = false;
+            btn.textContent = '✓ Approva Selezione (A)';
         }
+    }
 
-        function showLoading(message) {
-            document.getElementById('photo-section').innerHTML = `
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">${message}</div>
-                </div>
-            `;
-        }
-
-        function showEmptyState() {
-            document.getElementById('current-sku').textContent = 'COMPLETATO';
-            
-            // Check if there are deferred items
-            const deferredMsg = stats.deferred > 0 
-                ? `<p class="empty-text" style="margin-top: 12px; color: var(--accent-yellow);">Hai ${stats.deferred} SKU da verificare nel check secondario.</p>`
-                : '';
-            
-            document.getElementById('photo-section').innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">✓</div>
-                    <h2 class="empty-title">QC Review Completata</h2>
-                    <p class="empty-text">Tutti i prodotti in coda sono stati verificati.</p>
-                    ${deferredMsg}
-                </div>
-            `;
-        }
-
-        function showError(message) {
-            document.getElementById('photo-section').innerHTML = `
-                <div class="error-container">
-                    <h3 class="error-title">Errore</h3>
-                    <div class="error-message">${message}</div>
-                    <button class="btn-retry" onclick="loadPendingRecords()">Riprova</button>
-                </div>
-            `;
-        }
-
-        function openModal(url) {
-            if (!url) return;
-            document.getElementById('modal-img').src = url;
-            document.getElementById('modal').classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.remove('active');
-        }
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT') return;
-            
-            switch(e.key) {
-                case 'Escape':
-                    closeModal();
-                    break;
-                case 'a':
-                case 'A':
-                    if (!document.getElementById('btn-approve').disabled) {
-                        approvePhotos();
+    async function rejectProduct() {
+        if (!currentRecord) return;
+        const btn = document.getElementById('btn-reject');
+        btn.disabled = true;
+        try {
+            await apiRequest(INVENTARIO_TABLE, {
+                recordId: currentRecord.id,
+                method: 'PATCH',
+                body: {
+                    fields: {
+                        'AI_Quality_Check': { name: 'REJECTED' },
+                        'AI_Regenerate_Trigger': 1,
+                        'AI_Regen_Scope': { name: 'Both' }
                     }
-                    break;
-                case 'r':
-                case 'R':
-                    if (!document.getElementById('btn-regenerate').disabled) {
-                        triggerRegeneration();
-                    }
-                    break;
-                case 'd':
-                case 'D':
-                    if (!document.getElementById('btn-defer').disabled) {
-                        deferProduct();
-                    }
-                    break;
-                case 'ArrowRight':
-                    skipProduct();
-                    break;
-                case 'f':
-                case 'F':
-                    toggleRegenOption('front');
-                    break;
-                case 'b':
-                case 'B':
-                    toggleRegenOption('back');
-                    break;
-            }
-            
-            // Number keys for version selection
-            if (e.key >= '1' && e.key <= '9') {
-                const versionNum = parseInt(e.key);
-                if (versionNum <= currentVersions.length) {
-                    selectVersion(versionNum);
                 }
-            }
-        });
+            });
+            const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
+            if (idx !== -1) pendingRecords.splice(idx, 1);
+            stats.pending--;
+            stats.rejected++;
+            updateStatsUI();
+            showToast(`${currentRecord.fields.SKU} → rigenerazione richiesta`, 'info');
+            btn.disabled = false;
+            loadNextProduct();
+        } catch (error) {
+            showToast(`Errore: ${error.message}`, 'error');
+            btn.disabled = false;
+        }
+    }
+
+    async function deferProduct() {
+        if (!currentRecord) return;
+        try {
+            await apiRequest(INVENTARIO_TABLE, {
+                recordId: currentRecord.id,
+                method: 'PATCH',
+                body: { fields: { 'AI_Quality_Check': { name: 'DEFERRED' } } }
+            });
+            deferredRecords.push({ id: currentRecord.id, sku: currentRecord.fields.SKU });
+            localStorage.setItem('dirtytag_deferred_vp', JSON.stringify(deferredRecords));
+            const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
+            if (idx !== -1) pendingRecords.splice(idx, 1);
+            stats.pending--;
+            stats.deferred++;
+            updateStatsUI();
+            showToast(`${currentRecord.fields.SKU} scartato ⏸`, 'warning');
+            loadNextProduct();
+        } catch (error) {
+            showToast(`Errore: ${error.message}`, 'error');
+        }
+    }
+
+    function skipProduct() {
+        if (!currentRecord) return;
+        const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
+        if (idx !== -1) {
+            const skipped = pendingRecords.splice(idx, 1)[0];
+            pendingRecords.push(skipped);
+        }
+        showToast(`${currentRecord.fields.SKU} saltato`, 'info');
+        loadNextProduct();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // UTILITIES
+    // ═══════════════════════════════════════════════════════════
+    function extractDriveFileId(url) {
+        if (!url) return null;
+        const m1 = url.match(/\/file\/d\/([^\/]+)/);
+        if (m1) return m1[1];
+        const m2 = url.match(/[?&]id=([^&]+)/);
+        if (m2) return m2[1];
+        const m3 = url.match(/thumbnail\?id=([^&]+)/);
+        if (m3) return m3[1];
+        if (url.match(/^[a-zA-Z0-9_-]{25,}$/)) return url;
+        return null;
+    }
+
+    function updateStatsUI() {
+        document.getElementById('stat-pending').textContent = stats.pending;
+        document.getElementById('stat-approved').textContent = stats.approved;
+        document.getElementById('stat-rejected').textContent = stats.rejected;
+        document.getElementById('stat-deferred').textContent = stats.deferred;
+        const total = stats.pending + stats.approved + stats.rejected + stats.deferred;
+        const progress = total > 0 ? ((stats.approved + stats.rejected) / total) * 100 : 0;
+        document.getElementById('progress-fill').style.width = `${progress}%`;
+        document.getElementById('progress-text').textContent = `${Math.round(progress)}% completato`;
+    }
+
+    function showToast(message, type = 'success') {
+        const t = document.getElementById('toast');
+        t.textContent = message;
+        t.className = `toast ${type} show`;
+        setTimeout(() => t.className = 'toast', 2500);
+    }
+
+    function showLoading(msg) {
+        document.getElementById('photo-section').innerHTML = `<div class="loading"><div class="loading-spinner"></div><div class="loading-text">${msg}</div></div>`;
+    }
+
+    function showEmptyState() {
+        document.getElementById('current-sku').textContent = 'COMPLETATO';
+        document.getElementById('photo-section').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">✓</div>
+                <h2 class="empty-title">Recovery Review Completata</h2>
+                <p class="empty-text">Tutti i recovery records sono stati verificati.</p>
+            </div>`;
+    }
+
+    function showError(msg) {
+        document.getElementById('photo-section').innerHTML = `
+            <div class="error-container">
+                <h3 class="error-title">Errore</h3>
+                <div class="error-message">${msg}</div>
+                <button class="btn-retry" onclick="loadPendingRecords()">Riprova</button>
+            </div>`;
+    }
+
+    function openModal(url, resInfo) {
+        if (!url) return;
+        document.getElementById('modal-img').src = url;
+        document.getElementById('modal-res-info').textContent = resInfo || '';
+        document.getElementById('modal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('modal').classList.remove('active');
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // KEYBOARD SHORTCUTS
+    // ═══════════════════════════════════════════════════════════
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        switch(e.key) {
+            case 'Escape': closeModal(); break;
+            case 'a': case 'A':
+                if (!document.getElementById('btn-approve').disabled) approveSelection();
+                break;
+            case 'r': case 'R': rejectProduct(); break;
+            case 'd': case 'D': deferProduct(); break;
+            case 'ArrowRight': skipProduct(); break;
+        }
+    });
     </script>
 </body>
 </html>
