@@ -589,7 +589,8 @@
                         'RAW_Front_URL', 'RAW_Back_URL', 'RAW_FolderID',
                         'Catawiki_Description', 'Vinted_Description',
                         'Legacy_AI_Recovery', 'AI_Mode',
-                        'rawID_FRONT', 'rawID_BACK'
+                        'rawID_FRONT', 'rawID_BACK',
+                        'Color_IT'
                     ],
                     sort: [{ field: 'SKU', direction: 'asc' }],
                     offset
@@ -657,6 +658,9 @@
             // Also include existing links if not found in Drive scan
             addExistingLinksIfMissing(fields);
 
+            // Pre-select current links as FRONT/BACK
+            autoSelectCurrentLinks(fields);
+
             renderPhotoSection(fields);
         } catch (error) {
             console.warn('Drive scan failed, using fallback:', error.message);
@@ -719,7 +723,23 @@
             });
         }
 
+        autoSelectCurrentLinks(fields);
         renderPhotoSection(fields);
+    }
+
+    function autoSelectCurrentLinks(fields) {
+        const frontId = extractDriveFileId(fields.AI_Front_Image_Link);
+        const backId = extractDriveFileId(fields.AI_Back_Image_Link);
+
+        if (frontId) {
+            const frontVersion = driveVersions.find(v => v.fileId === frontId);
+            if (frontVersion) selectedFront = frontVersion;
+        }
+        if (backId) {
+            const backVersion = driveVersions.find(v => v.fileId === backId);
+            if (backVersion) selectedBack = backVersion;
+        }
+        updateSelectionUI();
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -728,6 +748,7 @@
     function renderProductInfo(fields) {
         document.getElementById('product-info').innerHTML = `
             <div class="info-row"><span class="info-key">Brand</span><span class="info-value">${fields.Brand_TXT || '—'}</span></div>
+            <div class="info-row"><span class="info-key">Colore</span><span class="info-value">${fields.Color_IT || '—'}</span></div>
             <div class="info-row"><span class="info-key">Categoria</span><span class="info-value">${fields.Category || '—'}</span></div>
             <div class="info-row"><span class="info-key">AI Mode</span><span class="info-value">${fields.AI_Mode || 'MANI'}</span></div>
             <div class="info-row"><span class="info-key">Versioni trovate</span><span class="info-value">${driveVersions.length} (${driveVersions.filter(v => v.meetsMinimum).length} ≥900px)</span></div>
