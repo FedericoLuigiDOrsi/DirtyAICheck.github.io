@@ -579,7 +579,7 @@
             let allRecs = [];
             let offset = null;
             // Recovery records: PENDING + Legacy flag
-            const formula = "AND({AI_Quality_Check} = 'PENDING', {Legacy_AI_Recovery} = TRUE())";
+            const formula = "AND({Recovery_QC_Status} = 'PENDING', {Legacy_AI_Recovery} = TRUE())";
             do {
                 const data = await apiRequest(INVENTARIO_TABLE, {
                     filterByFormula: formula,
@@ -994,7 +994,7 @@
             const updateFields = {
                 'AI_Front_Image_Link': newFrontUrl,
                 'AI_Back_Image_Link': newBackUrl,
-                'AI_Quality_Check': { name: 'APPROVED' }
+                'Recovery_QC_Status': { name: 'APPROVED' }
             };
 
             // If links changed and descriptions exist, flag for re-generation
@@ -1038,7 +1038,7 @@
                 method: 'PATCH',
                 body: {
                     fields: {
-                        'AI_Quality_Check': { name: 'REJECTED' },
+                        'Recovery_QC_Status': { name: 'NEEDS_REGEN' },
                         'AI_Regenerate_Trigger': 1,
                         'AI_Regen_Scope': { name: 'Both' }
                     }
@@ -1061,9 +1061,11 @@
     async function deferProduct() {
         if (!currentRecord) return;
         try {
-            // DEFERRED non esiste come valore AI_Quality_Check in Airtable.
-            // Salviamo solo in locale e rimuoviamo dalla coda senza scrivere stato invalido.
-            // Il record resta PENDING su Airtable per review futura.
+            await apiRequest(INVENTARIO_TABLE, {
+                recordId: currentRecord.id,
+                method: 'PATCH',
+                body: { fields: { 'Recovery_QC_Status': { name: 'SKIPPED' } } }
+            });
             deferredRecords.push({ id: currentRecord.id, sku: currentRecord.fields.SKU });
             localStorage.setItem('dirtytag_deferred_vp', JSON.stringify(deferredRecords));
             const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
@@ -1071,7 +1073,7 @@
             stats.pending--;
             stats.deferred++;
             updateStatsUI();
-            showToast(`${currentRecord.fields.SKU} scartato ⏸ (resta PENDING)`, 'warning');
+            showToast(`${currentRecord.fields.SKU} scartato ⏸`, 'warning');
             loadNextProduct();
         } catch (error) {
             showToast(`Errore: ${error.message}`, 'error');
