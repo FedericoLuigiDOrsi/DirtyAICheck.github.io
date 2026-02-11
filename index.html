@@ -579,7 +579,7 @@
             let allRecs = [];
             let offset = null;
             // Recovery records: PENDING + Legacy flag
-            const formula = "AND({Recovery_QC_Status} = 'PENDING', {Legacy_AI_Recovery} = TRUE())";
+            const formula = "AND(OR({Recovery_QC_Status} = 'PENDING', {Recovery_QC_Status} = ''), {Legacy_AI_Recovery} = TRUE())";
             do {
                 const data = await apiRequest(INVENTARIO_TABLE, {
                     filterByFormula: formula,
@@ -994,7 +994,7 @@
             const updateFields = {
                 'AI_Front_Image_Link': newFrontUrl,
                 'AI_Back_Image_Link': newBackUrl,
-                'Recovery_QC_Status': { name: 'APPROVED' }
+                'Recovery_QC_Status': 'APPROVED'
             };
 
             // If links changed and descriptions exist, flag for re-generation
@@ -1038,7 +1038,7 @@
                 method: 'PATCH',
                 body: {
                     fields: {
-                        'Recovery_QC_Status': { name: 'NEEDS_REGEN' },
+                        'Recovery_QC_Status': 'NEEDS_REGEN',
                         'AI_Regenerate_Trigger': 1,
                         'AI_Regen_Scope': { name: 'Both' }
                     }
@@ -1064,7 +1064,7 @@
             await apiRequest(INVENTARIO_TABLE, {
                 recordId: currentRecord.id,
                 method: 'PATCH',
-                body: { fields: { 'Recovery_QC_Status': { name: 'SKIPPED' } } }
+                body: { fields: { 'Recovery_QC_Status': 'SKIPPED' } }
             });
             deferredRecords.push({ id: currentRecord.id, sku: currentRecord.fields.SKU });
             localStorage.setItem('dirtytag_deferred_vp', JSON.stringify(deferredRecords));
