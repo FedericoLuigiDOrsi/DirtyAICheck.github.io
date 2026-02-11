@@ -478,7 +478,8 @@
                     <div class="hint"><kbd>R</kbd> Reject</div>
                     <div class="hint"><kbd>D</kbd> Scarta</div>
                     <div class="hint"><kbd>→</kbd> Salta</div>
-                    <div class="hint"><kbd>Click</kbd> Seleziona Front/Back</div>
+                    <div class="hint"><kbd>Click</kbd> Seleziona (1°=Front, 2°=Back)</div>
+                    <div class="hint"><kbd>2×Click</kbd> Zoom</div>
                 </div>
             </div>
         </div>
@@ -587,7 +588,7 @@
                         'AI_Front_Image_Link', 'AI_Back_Image_Link',
                         'RAW_Front_URL', 'RAW_Back_URL', 'RAW_FolderID',
                         'Catawiki_Description', 'Vinted_Description',
-                        'Legacy_AI_Recovery', 'AI_Mode_Selected',
+                        'Legacy_AI_Recovery', 'AI_Mode',
                         'rawID_FRONT', 'rawID_BACK'
                     ],
                     sort: [{ field: 'SKU', direction: 'asc' }],
@@ -728,7 +729,7 @@
         document.getElementById('product-info').innerHTML = `
             <div class="info-row"><span class="info-key">Brand</span><span class="info-value">${fields.Brand_TXT || '—'}</span></div>
             <div class="info-row"><span class="info-key">Categoria</span><span class="info-value">${fields.Category || '—'}</span></div>
-            <div class="info-row"><span class="info-key">AI Mode</span><span class="info-value">${fields.AI_Mode_Selected || 'MANI'}</span></div>
+            <div class="info-row"><span class="info-key">AI Mode</span><span class="info-value">${fields.AI_Mode || 'MANI'}</span></div>
             <div class="info-row"><span class="info-key">Versioni trovate</span><span class="info-value">${driveVersions.length} (${driveVersions.filter(v => v.meetsMinimum).length} ≥900px)</span></div>
         `;
     }
@@ -838,7 +839,7 @@
 
         return `
             <div class="version-card ${selClass} ${belowClass}" data-fileid="${v.fileId}">
-                <div class="version-card-img" onclick="openModal('${fullUrl}', '${resText}')">
+                <div class="version-card-img" onclick="handleCardClick(event, '${v.fileId}')">
                     <img src="${thumbUrl}" alt="${v.name}" loading="lazy">
                     <span class="version-card-type ${typeClass}">${v.inferredType || '?'}</span>
                     ${isFront ? '<span class="selection-badge front-sel">✓ FRONT</span>' : ''}
@@ -849,15 +850,57 @@
                     <span class="version-card-res ${resClass}">${resText}</span>
                 </div>
                 <div style="display:flex;border-top:1px solid var(--border);">
-                    <button onclick="event.stopPropagation(); selectAs('front', '${v.fileId}')" style="flex:1;background:${isFront ? 'var(--accent-green-dim)' : 'var(--bg-tertiary)'};border:none;padding:6px;color:${isFront ? 'var(--accent-green)' : 'var(--text-muted)'};font-family:inherit;font-size:0.6rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;border-right:1px solid var(--border);">
+                    <button onclick="event.stopPropagation(); selectAs('front', '${v.fileId}')" style="flex:1;background:${isFront ? 'var(--accent-green-dim)' : 'var(--bg-tertiary)'};border:none;padding:8px;color:${isFront ? 'var(--accent-green)' : 'var(--text-muted)'};font-family:inherit;font-size:0.7rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;border-right:1px solid var(--border);transition:all 0.15s;">
                         ${isFront ? '✓ ' : ''}Front
                     </button>
-                    <button onclick="event.stopPropagation(); selectAs('back', '${v.fileId}')" style="flex:1;background:${isBack ? 'var(--accent-blue-dim)' : 'var(--bg-tertiary)'};border:none;padding:6px;color:${isBack ? 'var(--accent-blue)' : 'var(--text-muted)'};font-family:inherit;font-size:0.6rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;">
+                    <button onclick="event.stopPropagation(); selectAs('back', '${v.fileId}')" style="flex:1;background:${isBack ? 'var(--accent-blue-dim)' : 'var(--bg-tertiary)'};border:none;padding:8px;color:${isBack ? 'var(--accent-blue)' : 'var(--text-muted)'};font-family:inherit;font-size:0.7rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;transition:all 0.15s;">
                         ${isBack ? '✓ ' : ''}Back
                     </button>
                 </div>
             </div>
         `;
+    }
+
+    // Smart card click: single click selects, double click opens modal
+    let lastClickTime = 0;
+    let lastClickFileId = '';
+    function handleCardClick(event, fileId) {
+        const now = Date.now();
+        // Double click (< 350ms) → open modal zoom
+        if (lastClickFileId === fileId && (now - lastClickTime) < 350) {
+            const v = driveVersions.find(vv => vv.fileId === fileId);
+            if (v) {
+                const fullUrl = `https://drive.google.com/thumbnail?id=${v.fileId}&sz=w1200`;
+                const resText = (v.width && v.height) ? `${v.width}×${v.height}` : '?×?';
+                openModal(fullUrl, resText);
+            }
+            lastClickTime = 0;
+            lastClickFileId = '';
+            return;
+        }
+        lastClickTime = now;
+        lastClickFileId = fileId;
+
+        // Single click → smart select
+        // If nothing selected yet → set as FRONT
+        // If already FRONT → toggle off
+        // If FRONT is set but BACK is not → set as BACK
+        // If already BACK → toggle off
+        const isFront = selectedFront && selectedFront.fileId === fileId;
+        const isBack = selectedBack && selectedBack.fileId === fileId;
+
+        if (isFront) {
+            selectAs('front', fileId); // toggle off
+        } else if (isBack) {
+            selectAs('back', fileId); // toggle off
+        } else if (!selectedFront) {
+            selectAs('front', fileId);
+        } else if (!selectedBack) {
+            selectAs('back', fileId);
+        } else {
+            // Both already selected → replace front
+            selectAs('front', fileId);
+        }
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -951,7 +994,8 @@
             const updateFields = {
                 'AI_Front_Image_Link': newFrontUrl,
                 'AI_Back_Image_Link': newBackUrl,
-                'AI_Quality_Check': { name: 'APPROVED' }
+                'AI_Quality_Check': { name: 'APPROVED' },
+                'Text_Pending_Trigger': 1
             };
 
             // If links changed and descriptions exist, flag for re-generation
@@ -1018,11 +1062,9 @@
     async function deferProduct() {
         if (!currentRecord) return;
         try {
-            await apiRequest(INVENTARIO_TABLE, {
-                recordId: currentRecord.id,
-                method: 'PATCH',
-                body: { fields: { 'AI_Quality_Check': { name: 'DEFERRED' } } }
-            });
+            // DEFERRED non esiste come valore AI_Quality_Check in Airtable.
+            // Salviamo solo in locale e rimuoviamo dalla coda senza scrivere stato invalido.
+            // Il record resta PENDING su Airtable per review futura.
             deferredRecords.push({ id: currentRecord.id, sku: currentRecord.fields.SKU });
             localStorage.setItem('dirtytag_deferred_vp', JSON.stringify(deferredRecords));
             const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
@@ -1030,7 +1072,7 @@
             stats.pending--;
             stats.deferred++;
             updateStatsUI();
-            showToast(`${currentRecord.fields.SKU} scartato ⏸`, 'warning');
+            showToast(`${currentRecord.fields.SKU} scartato ⏸ (resta PENDING)`, 'warning');
             loadNextProduct();
         } catch (error) {
             showToast(`Errore: ${error.message}`, 'error');
