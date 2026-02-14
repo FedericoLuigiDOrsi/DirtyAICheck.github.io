@@ -1278,7 +1278,16 @@
         }
 
         function loadNextProduct() {
-            // Reset UI state for new product
+            // ✅ FIX: Reset ALL action buttons for new product
+            const btnApprove = document.getElementById('btn-approve');
+            btnApprove.disabled = false;
+            btnApprove.innerHTML = '<span class="action-btn-icon">✓</span><span>Approva Versione</span>';
+
+            const btnDefer = document.getElementById('btn-defer');
+            btnDefer.disabled = false;
+            btnDefer.innerHTML = '<span class="action-btn-icon">⏸</span><span>Scarta per Check</span>';
+
+            // Reset regen UI state
             document.getElementById('regen-front').checked = false;
             document.getElementById('regen-back').checked = false;
             document.getElementById('regen-front-box').classList.remove('checked');
@@ -1562,15 +1571,16 @@
             
             btn.disabled = !frontChecked && !backChecked;
             
+            // ✅ FIX: Use innerHTML to preserve span structure
+            let label = 'Rigenera Selezionate';
             if (frontChecked && backChecked) {
-                btn.textContent = '↻ Rigenera Entrambe';
+                label = 'Rigenera Entrambe';
             } else if (frontChecked) {
-                btn.textContent = '↻ Rigenera FRONT';
+                label = 'Rigenera FRONT';
             } else if (backChecked) {
-                btn.textContent = '↻ Rigenera BACK';
-            } else {
-                btn.textContent = '↻ Rigenera Selezionate';
+                label = 'Rigenera BACK';
             }
+            btn.innerHTML = `<span class="action-btn-icon">↻</span><span>${label}</span>`;
         }
 
         // ✅ FIX BUG #3 & #4: Uniform button handling pattern
@@ -1579,7 +1589,7 @@
             
             const btn = document.getElementById('btn-approve');
             btn.disabled = true;
-            btn.textContent = 'Approvazione...';
+            btn.innerHTML = '<span class="action-btn-icon">⏳</span><span>Approvazione...</span>';
 
             try {
                 await apiRequest(INVENTARIO_TABLE, {
@@ -1610,7 +1620,7 @@
             } catch (error) {
                 showToast(`Errore: ${error.message}`, 'error');
                 btn.disabled = false;
-                btn.textContent = '✓ Approva Versione';
+                btn.innerHTML = '<span class="action-btn-icon">✓</span><span>Approva Versione</span>';
             }
         }
 
@@ -1628,7 +1638,7 @@
 
             const btn = document.getElementById('btn-regenerate');
             btn.disabled = true;
-            btn.textContent = 'Invio richiesta...';
+            btn.innerHTML = '<span class="action-btn-icon">⏳</span><span>Invio richiesta...</span>';
 
             try {
                 let regenScope = '';
@@ -1680,7 +1690,7 @@
             
             const btn = document.getElementById('btn-defer');
             btn.disabled = true;
-            btn.textContent = 'Scarto in corso...';
+            btn.innerHTML = '<span class="action-btn-icon">⏳</span><span>Scarto in corso...</span>';
 
             try {
                 await apiRequest(INVENTARIO_TABLE, {
@@ -1715,7 +1725,7 @@
 
                 showToast(`${currentRecord.fields.SKU} scartato per check secondario ⏸`, 'warning');
                 
-                btn.textContent = '⏸ Scarta per Check';
+                btn.innerHTML = '<span class="action-btn-icon">⏸</span><span>Scarta per Check</span>';
                 btn.disabled = false;
                 
                 loadNextProduct();
@@ -1723,7 +1733,7 @@
             } catch (error) {
                 showToast(`Errore: ${error.message}`, 'error');
                 btn.disabled = false;
-                btn.textContent = '⏸ Scarta per Check';
+                btn.innerHTML = '<span class="action-btn-icon">⏸</span><span>Scarta per Check</span>';
             }
         }
 
