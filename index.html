@@ -1657,7 +1657,7 @@
                     body: {
                         fields: {
                             'AI_Quality_Check': 'REJECTED',
-                            'AI_Regenerate_Trigger': 1,  // ✅ Integer, not boolean
+                            'AI_Regenerate_Trigger': true,  // ✅ Boolean for REST API (not integer)
                             'AI_Regen_Scope': regenScope,
                             'Product_Status': 'RAW_PROCESSED'
                         }
