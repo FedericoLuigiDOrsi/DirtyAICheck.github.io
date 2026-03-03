@@ -1190,6 +1190,17 @@
     </div>
 
     <script>
+        // Utility: escape HTML to prevent XSS/layout breaks
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         const BASE_ID = 'apptD8GSxN3vhhivI';
         const INVENTARIO_TABLE = 'tblddAcLcQAyk050u';
         
@@ -1425,23 +1436,23 @@
             container.innerHTML = `
                 <div class="info-row">
                     <span class="info-key">Brand</span>
-                    <span class="info-value">${brand}</span>
+                    <span class="info-value">${escapeHtml(brand)}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-key">Categoria</span>
-                    <span class="info-value">${category}</span>
+                    <span class="info-value">${escapeHtml(category)}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-key">AI Mode</span>
-                    <span class="info-value">${aiModeStr}</span>
+                    <span class="info-value">${escapeHtml(aiModeStr)}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-key">AI Status</span>
-                    <span class="info-value">${aiStatusStr}</span>
+                    <span class="info-value">${escapeHtml(aiStatusStr)}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-key">Listing</span>
-                    <span class="info-value" style="color: ${listingStatusStr === 'READY' ? 'var(--accent-green)' : 'var(--text-secondary)'}">${listingStatusStr}</span>
+                    <span class="info-value" style="color: ${listingStatusStr === 'READY' ? 'var(--accent-green)' : 'var(--text-secondary)'}">${escapeHtml(listingStatusStr)}</span>
                 </div>
             `;
         }
@@ -1600,19 +1611,19 @@
 
             var html = '<div class="text-field-card">';
             html += '<div class="text-field-label">Titolo Listing</div>';
-            html += '<div class="text-field-content title">' + (title || '<span class="text-field-empty">Nessun titolo generato</span>') + '</div>';
+            html += '<div class="text-field-content title">' + (title ? escapeHtml(title) : '<span class="text-field-empty">Nessun titolo generato</span>') + '</div>';
             html += '</div>';
             html += '<div class="text-field-card">';
             html += '<div class="text-field-label">Descrizione Vinted</div>';
-            html += '<div class="text-field-content">' + (vinted || '<span class="text-field-empty">Nessuna descrizione Vinted</span>') + '</div>';
+            html += '<div class="text-field-content">' + (vinted ? escapeHtml(vinted) : '<span class="text-field-empty">Nessuna descrizione Vinted</span>') + '</div>';
             html += '</div>';
             html += '<div class="text-field-card">';
             html += '<div class="text-field-label">Descrizione Catawiki</div>';
-            html += '<div class="text-field-content">' + (catawiki || '<span class="text-field-empty">Nessuna descrizione Catawiki</span>') + '</div>';
+            html += '<div class="text-field-content">' + (catawiki ? escapeHtml(catawiki) : '<span class="text-field-empty">Nessuna descrizione Catawiki</span>') + '</div>';
             html += '</div>';
             html += '<div class="text-field-card">';
             html += '<div class="text-field-label">LabelPhrase</div>';
-            html += '<div class="text-field-content label-phrase">' + (labelPhrase || '<span class="text-field-empty">Nessuna frase generata</span>') + '</div>';
+            html += '<div class="text-field-content label-phrase">' + (labelPhrase ? escapeHtml(labelPhrase) : '<span class="text-field-empty">Nessuna frase generata</span>') + '</div>';
             html += '</div>';
             return html;
         }
@@ -1851,7 +1862,7 @@
                             'Vinted_Description': '',
                             'Catawiki_Description': '',
                             'LabelPhrase': '',
-                            'Listing_Status': '',  // Clear: impedisce export W5 durante re-processing
+                            'Listing_Status': null,  // Clear singleSelect: null (non '') impedisce export W5
                             'Product_Status': 'RAW_WAITING',
                             'AI_Quality_Check': 'REJECTED',
                             'AI_Pending_Trigger': 0
@@ -1902,7 +1913,7 @@
                 const deferredItem = {
                     id: currentRecord.id,
                     sku: currentRecord.fields.SKU,
-                    brand: currentRecord.fields.Brand || '—',
+                    brand: currentRecord.fields.Brand_TXT || '—',
                     timestamp: new Date().toISOString()
                 };
                 deferredRecords.push(deferredItem);
@@ -1984,11 +1995,11 @@
                 html += `
                     <div class="deferred-item">
                         <div>
-                            <span class="deferred-item-sku">${item.sku}</span>
-                            <span style="color: var(--text-muted); font-size: 0.65rem; margin-left: 8px;">${item.brand}</span>
+                            <span class="deferred-item-sku">${escapeHtml(item.sku)}</span>
+                            <span style="color: var(--text-muted); font-size: 0.65rem; margin-left: 8px;">${escapeHtml(item.brand)}</span>
                         </div>
                         <div class="deferred-item-actions">
-                            <button class="deferred-item-btn restore" onclick="restoreDeferredProduct('${item.id}', '${item.sku}')" title="Ripristina in coda">
+                            <button class="deferred-item-btn restore" onclick="restoreDeferredProduct('${escapeHtml(item.id)}', '${escapeHtml(item.sku)}')" title="Ripristina in coda">
                                 ↺ Ripristina
                             </button>
                         </div>
@@ -2042,7 +2053,7 @@
             document.getElementById('photo-section').innerHTML = `
                 <div class="error-container">
                     <h3 class="error-title">Errore</h3>
-                    <div class="error-message">${message}</div>
+                    <div class="error-message">${escapeHtml(message)}</div>
                     <button class="btn-retry" onclick="loadPendingRecords()">Riprova</button>
                 </div>
             `;
