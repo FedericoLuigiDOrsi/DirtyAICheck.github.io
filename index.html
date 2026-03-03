@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DirtyTag — AI Photo QC Review</title>
+    <title>DirtyTag — AI QC Review v2</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -646,6 +646,68 @@
             text-align: center;
         }
 
+        /* Text Review Section */
+        .text-review-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .text-review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .text-review-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-green);
+        }
+
+        .text-field-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .text-field-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .text-field-content {
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .text-field-content.title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .text-field-content.label-phrase {
+            color: var(--accent-orange);
+            font-style: italic;
+        }
+
+        .text-field-empty {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-style: italic;
+        }
+
         /* Version History */
         .version-section {
             margin-top: 24px;
@@ -949,7 +1011,7 @@
         <div class="header-left">
             <div class="logo-section">
                 <div class="logo">Dirty<span>Tag</span></div>
-                <div class="module-badge">AI Photo QC</div>
+                <div class="module-badge">AI QC v2</div>
             </div>
             <div class="sku-display" id="sku-display" style="display:none;">
                 <span class="sku-label">Current SKU</span>
@@ -987,7 +1049,7 @@
     <!-- Login Panel -->
     <div class="login-panel" id="login-panel">
         <div class="login-card">
-            <h1 class="login-title">AI Photo QC Review</h1>
+            <h1 class="login-title">AI QC Review v2</h1>
             <p class="login-subtitle">Accedi con la tua chiave API Airtable</p>
             <form onsubmit="event.preventDefault(); startApp();">
                 <div class="form-group">
@@ -1049,7 +1111,7 @@
                     
                     <button class="action-btn primary" id="btn-approve" onclick="approvePhotos()">
                         <span class="action-btn-icon">✓</span>
-                        <span>Approva Versione</span>
+                        <span>Approva Tutto</span>
                     </button>
 
                     <div class="action-separator"></div>
@@ -1067,7 +1129,14 @@
 
                     <button class="action-btn danger" id="btn-regenerate" onclick="triggerRegeneration()" disabled>
                         <span class="action-btn-icon">↻</span>
-                        <span>Rigenera Selezionate</span>
+                        <span>Rigenera Foto</span>
+                    </button>
+
+                    <div class="action-separator"></div>
+
+                    <button class="action-btn warning" id="btn-regen-texts" onclick="regenerateTexts()">
+                        <span class="action-btn-icon">✎</span>
+                        <span>Rigenera Testi</span>
                     </button>
 
                     <div class="action-separator"></div>
@@ -1117,7 +1186,7 @@
 
     <!-- Shortcuts Hint -->
     <div class="shortcuts-hint">
-        <strong>A</strong> Approve · <strong>R</strong> Regen · <strong>D</strong> Defer · <strong>→</strong> Skip · <strong>F/B</strong> Toggle · <strong>1-9</strong> Version
+        <strong>A</strong> Approve · <strong>R</strong> Regen Foto · <strong>T</strong> Regen Testi · <strong>D</strong> Defer · <strong>→</strong> Skip · <strong>F/B</strong> Toggle · <strong>1-9</strong> Version
     </div>
 
     <script>
@@ -1202,6 +1271,9 @@
             if (options.offset) {
                 params.append('offset', options.offset);
             }
+            if (options.fields) {
+                options.fields.forEach(f => params.append('fields[]', f));
+            }
             
             const queryString = params.toString();
             if (queryString) {
@@ -1241,13 +1313,28 @@
                 
                 // Filter: AI_Quality_Check = PENDING
                 const formula = "{AI_Quality_Check} = 'PENDING'";
-                
+
+                // Fields to fetch — include text fields for v2 QC review
+                const fetchFields = [
+                    'SKU', 'Brand_TXT', 'Category_TXT', 'AI_Mode', 'AI_Status',
+                    'AI_Quality_Check', 'Listing_Status', 'Product_Status',
+                    'RAW_Front_URL', 'RAW_Back_URL',
+                    'AI_Front_Image_Link', 'AI_Back_Image_Link',
+                    'AI_Regeneration_Count', 'AI_Approved_Version',
+                    'AI_Processing_History',
+                    'Listing_Title', 'Vinted_Description', 'Catawiki_Description',
+                    'LabelPhrase'
+                ];
+
                 do {
-                    const data = await apiRequest(INVENTARIO_TABLE, { 
+                    const params = {
                         filterByFormula: formula,
                         sort: [{ field: 'SKU', direction: 'asc' }],
-                        offset 
-                    });
+                        offset
+                    };
+                    // Add fields to URL params
+                    params.fields = fetchFields;
+                    const data = await apiRequest(INVENTARIO_TABLE, params);
                     allRecords = allRecords.concat(data.records);
                     offset = data.offset;
                 } while (offset);
@@ -1281,11 +1368,15 @@
             // ✅ FIX: Reset ALL action buttons for new product
             const btnApprove = document.getElementById('btn-approve');
             btnApprove.disabled = false;
-            btnApprove.innerHTML = '<span class="action-btn-icon">✓</span><span>Approva Versione</span>';
+            btnApprove.innerHTML = '<span class="action-btn-icon">✓</span><span>Approva Tutto</span>';
 
             const btnDefer = document.getElementById('btn-defer');
             btnDefer.disabled = false;
             btnDefer.innerHTML = '<span class="action-btn-icon">⏸</span><span>Scarta per Check</span>';
+
+            const btnRegenTexts = document.getElementById('btn-regen-texts');
+            btnRegenTexts.disabled = false;
+            btnRegenTexts.innerHTML = '<span class="action-btn-icon">✎</span><span>Rigenera Testi</span>';
 
             // Reset regen UI state
             document.getElementById('regen-front').checked = false;
@@ -1309,26 +1400,48 @@
             
             // Build version structure and render photos
             buildVersionsAndRender(fields);
+
+            // Safeguard: disable "Approva Tutto" if texts are empty
+            const hasTexts = (fields.Listing_Title || '').trim() !== '' &&
+                             (fields.Vinted_Description || '').trim() !== '';
+            const btnApproveCheck = document.getElementById('btn-approve');
+            if (!hasTexts) {
+                btnApproveCheck.disabled = true;
+                btnApproveCheck.innerHTML = '<span class="action-btn-icon">⚠</span><span>Testi mancanti</span>';
+                btnApproveCheck.title = 'Non puoi approvare senza Listing_Title e Vinted_Description. Usa "Rigenera Testi".';
+            }
         }
 
         function renderProductInfo(fields) {
             const container = document.getElementById('product-info');
+            const brand = fields.Brand_TXT || fields.Brand || '—';
+            const category = fields.Category_TXT || fields.Category || '—';
+            const aiMode = fields.AI_Mode || fields.AI_Mode_Selected || 'MANI';
+            const aiModeStr = typeof aiMode === 'object' ? aiMode.name : aiMode;
+            const aiStatus = fields.AI_Status || '—';
+            const aiStatusStr = typeof aiStatus === 'object' ? aiStatus.name : aiStatus;
+            const listingStatus = fields.Listing_Status || '—';
+            const listingStatusStr = typeof listingStatus === 'object' ? listingStatus.name : listingStatus;
             container.innerHTML = `
                 <div class="info-row">
                     <span class="info-key">Brand</span>
-                    <span class="info-value">${fields.Brand || '—'}</span>
+                    <span class="info-value">${brand}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-key">Categoria</span>
-                    <span class="info-value">${fields.Category || '—'}</span>
+                    <span class="info-value">${category}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-key">AI Mode</span>
-                    <span class="info-value">${fields.AI_Mode_Selected || 'MANI'}</span>
+                    <span class="info-value">${aiModeStr}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-key">Status</span>
-                    <span class="info-value">${fields.AI_Status || '—'}</span>
+                    <span class="info-key">AI Status</span>
+                    <span class="info-value">${aiStatusStr}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-key">Listing</span>
+                    <span class="info-value" style="color: ${listingStatusStr === 'READY' ? 'var(--accent-green)' : 'var(--text-secondary)'}">${listingStatusStr}</span>
                 </div>
             `;
         }
@@ -1341,15 +1454,10 @@
             const aiFrontLink = fields.AI_Front_Image_Link || '';
             const aiBackLink = fields.AI_Back_Image_Link || '';
             
-            // ✅ FIX BUG #2: Parse AI_Version_History JSON for historical versions
+            // AI_Processing_History is plain text (timestamps), not JSON.
+            // Historical version photo URLs are not stored in Airtable.
+            // Only the current version has viewable photos; older versions show "Non disponibile".
             let versionHistory = {};
-            try {
-                if (fields.AI_Version_History) {
-                    versionHistory = JSON.parse(fields.AI_Version_History);
-                }
-            } catch (e) {
-                console.warn('Failed to parse AI_Version_History:', e);
-            }
             
             // Build versions array with historical data
             currentVersions = [];
@@ -1464,6 +1572,15 @@
                     </div>
                 </div>
 
+                <!-- Text Review Section (v2) -->
+                <div class="text-review-section">
+                    <div class="text-review-header">
+                        <span class="text-review-title">◆ Testi Generati</span>
+                        <span class="column-badge">W024</span>
+                    </div>
+                    ${renderTextFields(fields)}
+                </div>
+
                 <!-- Version History -->
                 <div class="version-section">
                     <div class="version-header">
@@ -1473,6 +1590,31 @@
                     ${renderVersionHistory()}
                 </div>
             `;
+        }
+
+        function renderTextFields(fields) {
+            const title = fields.Listing_Title || '';
+            const vinted = fields.Vinted_Description || '';
+            const catawiki = fields.Catawiki_Description || '';
+            const labelPhrase = fields.LabelPhrase || '';
+
+            var html = '<div class="text-field-card">';
+            html += '<div class="text-field-label">Titolo Listing</div>';
+            html += '<div class="text-field-content title">' + (title || '<span class="text-field-empty">Nessun titolo generato</span>') + '</div>';
+            html += '</div>';
+            html += '<div class="text-field-card">';
+            html += '<div class="text-field-label">Descrizione Vinted</div>';
+            html += '<div class="text-field-content">' + (vinted || '<span class="text-field-empty">Nessuna descrizione Vinted</span>') + '</div>';
+            html += '</div>';
+            html += '<div class="text-field-card">';
+            html += '<div class="text-field-label">Descrizione Catawiki</div>';
+            html += '<div class="text-field-content">' + (catawiki || '<span class="text-field-empty">Nessuna descrizione Catawiki</span>') + '</div>';
+            html += '</div>';
+            html += '<div class="text-field-card">';
+            html += '<div class="text-field-label">LabelPhrase</div>';
+            html += '<div class="text-field-content label-phrase">' + (labelPhrase || '<span class="text-field-empty">Nessuna frase generata</span>') + '</div>';
+            html += '</div>';
+            return html;
         }
 
         function renderVersionHistory() {
@@ -1592,13 +1734,16 @@
             btn.innerHTML = '<span class="action-btn-icon">⏳</span><span>Approvazione...</span>';
 
             try {
+                // v2: QC check + status advancement (replaces W3.5)
                 await apiRequest(INVENTARIO_TABLE, {
                     recordId: currentRecord.id,
                     method: 'PATCH',
                     body: {
                         fields: {
                             'AI_Quality_Check': 'APPROVED',
-                            'AI_Approved_Version': selectedVersion?.version || 1
+                            'AI_Approved_Version': selectedVersion?.version || 1,
+                            'Product_Status': 'LISTING_READY',
+                            'AI_Approved_Processed': 1
                         }
                     }
                 });
@@ -1620,7 +1765,7 @@
             } catch (error) {
                 showToast(`Errore: ${error.message}`, 'error');
                 btn.disabled = false;
-                btn.innerHTML = '<span class="action-btn-icon">✓</span><span>Approva Versione</span>';
+                btn.innerHTML = '<span class="action-btn-icon">✓</span><span>Approva Tutto</span>';
             }
         }
 
@@ -1657,7 +1802,8 @@
                     body: {
                         fields: {
                             'AI_Quality_Check': 'REJECTED',
-                            'AI_Regenerate_Trigger': true,  // ✅ Boolean for REST API (not integer)
+                            'AI_Pending_Trigger': 1,     // W3 filter: {AI_Pending_Trigger}=1
+                            'AI_Regenerate_Trigger': 1,  // Tracking field (W3 resets to 0)
                             'AI_Regen_Scope': regenScope,
                             'Product_Status': 'RAW_PROCESSED'
                         }
@@ -1682,6 +1828,56 @@
                 showToast(`Errore: ${error.message}`, 'error');
                 btn.disabled = false;
                 updateRegenButton();
+            }
+        }
+
+        async function regenerateTexts() {
+            if (!currentRecord) return;
+
+            const btn = document.getElementById('btn-regen-texts');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="action-btn-icon">⏳</span><span>Rigenerazione testi...</span>';
+
+            try {
+                // Reset to RAW_WAITING → W024 re-processes entire pipeline (photos + texts)
+                // NOTE: This also triggers W3 photo regen. For text-only regen,
+                // W024 would need a dedicated text-regen filter (future enhancement).
+                await apiRequest(INVENTARIO_TABLE, {
+                    recordId: currentRecord.id,
+                    method: 'PATCH',
+                    body: {
+                        fields: {
+                            'Listing_Title': '',
+                            'Vinted_Description': '',
+                            'Catawiki_Description': '',
+                            'LabelPhrase': '',
+                            'Listing_Status': '',  // Clear: impedisce export W5 durante re-processing
+                            'Product_Status': 'RAW_WAITING',
+                            'AI_Quality_Check': 'REJECTED',
+                            'AI_Pending_Trigger': 0
+                        }
+                    }
+                });
+
+                showToast(`${currentRecord.fields.SKU} → re-processing completo (testi + foto)`, 'info');
+
+                btn.disabled = false;
+                btn.innerHTML = '<span class="action-btn-icon">✎</span><span>Rigenera Testi</span>';
+
+                // Skip to next product (texts will be regenerated by W024)
+                const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
+                if (idx !== -1) {
+                    pendingRecords.splice(idx, 1);
+                }
+                stats.pending--;
+                stats.regenerated++;
+                updateStatsUI();
+                loadNextProduct();
+
+            } catch (error) {
+                showToast(`Errore: ${error.message}`, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<span class="action-btn-icon">✎</span><span>Rigenera Testi</span>';
             }
         }
 
@@ -1880,6 +2076,12 @@
                 case 'R':
                     if (!document.getElementById('btn-regenerate').disabled) {
                         triggerRegeneration();
+                    }
+                    break;
+                case 't':
+                case 'T':
+                    if (!document.getElementById('btn-regen-texts').disabled) {
+                        regenerateTexts();
                     }
                     break;
                 case 'd':
