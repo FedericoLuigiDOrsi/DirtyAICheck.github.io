@@ -1754,7 +1754,7 @@
                             'AI_Quality_Check': 'APPROVED',
                             'AI_Approved_Version': selectedVersion?.version || 1,
                             'Product_Status': 'LISTING_READY',
-                            'AI_Approved_Processed': 1
+                            'AI_Approved_Processed': true  // REST API: checkbox = boolean (n8n usa 1/0)
                         }
                     }
                 });
@@ -1806,15 +1806,15 @@
                     regenScope = 'BACK';
                 }
 
-                // CRITICAL: Boolean fields MUST use integer 1/0 for Airtable
+                // CRITICAL: REST API checkbox = boolean true/false (n8n usa 1/0)
                 await apiRequest(INVENTARIO_TABLE, {
                     recordId: currentRecord.id,
                     method: 'PATCH',
                     body: {
                         fields: {
                             'AI_Quality_Check': 'REJECTED',
-                            'AI_Pending_Trigger': 1,     // W3 filter: {AI_Pending_Trigger}=1
-                            'AI_Regenerate_Trigger': 1,  // Tracking field (W3 resets to 0)
+                            'AI_Pending_Trigger': true,      // W3 filter: {AI_Pending_Trigger}=1
+                            'AI_Regenerate_Trigger': true,   // Tracking field (W3 resets to 0)
                             'AI_Regen_Scope': regenScope,
                             'Product_Status': 'RAW_PROCESSED'
                         }
@@ -1865,7 +1865,7 @@
                             'Listing_Status': null,  // Clear singleSelect: null (non '') impedisce export W5
                             'Product_Status': 'RAW_WAITING',
                             'AI_Quality_Check': 'REJECTED',
-                            'AI_Pending_Trigger': 0
+                            'AI_Pending_Trigger': false  // REST API: checkbox = boolean
                         }
                     }
                 });
