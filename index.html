@@ -708,6 +708,26 @@
             font-style: italic;
         }
 
+        .price-section {
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .price-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent-orange);
+        }
+
+        .action-btn.price-regen {
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+        }
+
+        .action-btn.price-regen:hover:not(:disabled) {
+            background: var(--accent-orange-dim);
+        }
+
         /* Version History */
         .version-section {
             margin-top: 24px;
@@ -1056,6 +1076,10 @@
                     <label class="form-label">Airtable API Key</label>
                     <input type="password" id="api-key" class="form-input" placeholder="pat***********************">
                 </div>
+                <div class="form-group">
+                    <label class="form-label">APIyi API Key <span style="color: var(--text-muted); font-size: 0.65rem; text-transform: none; letter-spacing: 0;">(opzionale — per Rigenera Stima)</span></label>
+                    <input type="password" id="gemini-key" class="form-input" placeholder="sk-************************">
+                </div>
                 <button type="submit" class="btn-primary">Accedi →</button>
             </form>
         </div>
@@ -1139,6 +1163,11 @@
                         <span>Rigenera Testi</span>
                     </button>
 
+                    <button class="action-btn price-regen" id="btn-regen-price" onclick="regeneratePrice()">
+                        <span class="action-btn-icon">€</span>
+                        <span>Rigenera Stima</span>
+                    </button>
+
                     <div class="action-separator"></div>
 
                     <button class="action-btn warning" id="btn-defer" onclick="deferProduct()">
@@ -1205,6 +1234,7 @@
         const INVENTARIO_TABLE = 'tblddAcLcQAyk050u';
         
         let API_KEY = '';
+        let GEMINI_KEY = '';
         let allRecords = [];
         let pendingRecords = [];
         let deferredRecords = [];
@@ -1224,6 +1254,10 @@
             const savedKey = localStorage.getItem('dirtytag_api_key_v3');
             if (savedKey) {
                 document.getElementById('api-key').value = savedKey;
+            }
+            const savedGeminiKey = localStorage.getItem('dirtytag_gemini_key');
+            if (savedGeminiKey) {
+                document.getElementById('gemini-key').value = savedGeminiKey;
             }
 
             // Load deferred list from localStorage
@@ -1246,6 +1280,11 @@
             }
             API_KEY = key;
             localStorage.setItem('dirtytag_api_key_v3', key);
+            const geminiKey = document.getElementById('gemini-key').value.trim();
+            if (geminiKey) {
+                GEMINI_KEY = geminiKey;
+                localStorage.setItem('dirtytag_gemini_key', geminiKey);
+            }
             
             document.getElementById('login-panel').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
@@ -1334,7 +1373,9 @@
                     'AI_Regeneration_Count', 'AI_Approved_Version',
                     'AI_Processing_History',
                     'Listing_Title', 'Vinted_Description', 'Catawiki_Description',
-                    'LabelPhrase'
+                    'LabelPhrase',
+                    // Price estimation fields
+                    'AI_Estimated_Value', 'Condizione', 'Tag Size', 'Materiale', '€ Iniziale'
                 ];
 
                 do {
@@ -1388,6 +1429,10 @@
             const btnRegenTexts = document.getElementById('btn-regen-texts');
             btnRegenTexts.disabled = false;
             btnRegenTexts.innerHTML = '<span class="action-btn-icon">✎</span><span>Rigenera Testi</span>';
+
+            const btnRegenPrice = document.getElementById('btn-regen-price');
+            btnRegenPrice.disabled = false;
+            btnRegenPrice.innerHTML = '<span class="action-btn-icon">€</span><span>Rigenera Stima</span>';
 
             // Reset regen UI state
             document.getElementById('regen-front').checked = false;
@@ -1608,6 +1653,7 @@
             const vinted = fields.Vinted_Description || '';
             const catawiki = fields.Catawiki_Description || '';
             const labelPhrase = fields.LabelPhrase || '';
+            const estimatedValue = fields.AI_Estimated_Value;
 
             var html = '<div class="text-field-card">';
             html += '<div class="text-field-label">Titolo Listing</div>';
@@ -1624,6 +1670,15 @@
             html += '<div class="text-field-card">';
             html += '<div class="text-field-label">LabelPhrase</div>';
             html += '<div class="text-field-content label-phrase">' + (labelPhrase ? escapeHtml(labelPhrase) : '<span class="text-field-empty">Nessuna frase generata</span>') + '</div>';
+            html += '</div>';
+            // Stima Prezzo AI
+            html += '<div class="text-field-card price-section">';
+            html += '<div class="text-field-label">◆ Stima Prezzo AI</div>';
+            if (estimatedValue !== undefined && estimatedValue !== null && estimatedValue !== '') {
+                html += '<div class="text-field-content price-value">€ ' + escapeHtml(String(estimatedValue)) + '</div>';
+            } else {
+                html += '<div class="text-field-content"><span class="text-field-empty">Stima non ancora generata — usa Rigenera Stima</span></div>';
+            }
             html += '</div>';
             return html;
         }
@@ -1847,12 +1902,10 @@
 
             const btn = document.getElementById('btn-regen-texts');
             btn.disabled = true;
-            btn.innerHTML = '<span class="action-btn-icon">⏳</span><span>Rigenerazione testi...</span>';
+            btn.innerHTML = '<span class="action-btn-icon">⏳</span><span>Invio richiesta...</span>';
 
             try {
                 // Reset to RAW_WAITING → W024 re-processes entire pipeline (photos + texts)
-                // NOTE: This also triggers W3 photo regen. For text-only regen,
-                // W024 would need a dedicated text-regen filter (future enhancement).
                 await apiRequest(INVENTARIO_TABLE, {
                     recordId: currentRecord.id,
                     method: 'PATCH',
@@ -1862,7 +1915,7 @@
                             'Vinted_Description': '',
                             'Catawiki_Description': '',
                             'LabelPhrase': '',
-                            'Listing_Status': null,  // Clear singleSelect: null (non '') impedisce export W5
+                            'Listing_Status': '',
                             'Product_Status': 'RAW_WAITING',
                             'AI_Quality_Check': 'REJECTED',
                             'AI_Pending_Trigger': false  // REST API: checkbox = boolean
@@ -1870,12 +1923,27 @@
                     }
                 });
 
-                showToast(`${currentRecord.fields.SKU} → re-processing completo (testi + foto)`, 'info');
+                // ✅ FIX: Update local state immediately so UI reflects cleared texts
+                currentRecord.fields.Listing_Title = '';
+                currentRecord.fields.Vinted_Description = '';
+                currentRecord.fields.Catawiki_Description = '';
+                currentRecord.fields.LabelPhrase = '';
+                currentRecord.fields.Product_Status = 'RAW_WAITING';
+
+                // Re-render content area to show cleared texts
+                renderPhotoSection(currentRecord.fields);
+
+                // Disable approve button — texts are now empty
+                const btnApprove = document.getElementById('btn-approve');
+                btnApprove.disabled = true;
+                btnApprove.innerHTML = '<span class="action-btn-icon">⚠</span><span>Testi mancanti</span>';
 
                 btn.disabled = false;
                 btn.innerHTML = '<span class="action-btn-icon">✎</span><span>Rigenera Testi</span>';
 
-                // Skip to next product (texts will be regenerated by W024)
+                showToast(`${currentRecord.fields.SKU} → testi azzerati, W024 rigenererà ✓`, 'success');
+
+                // Remove from queue and update stats (but stay on current product)
                 const idx = pendingRecords.findIndex(r => r.id === currentRecord.id);
                 if (idx !== -1) {
                     pendingRecords.splice(idx, 1);
@@ -1883,12 +1951,98 @@
                 stats.pending--;
                 stats.regenerated++;
                 updateStatsUI();
-                loadNextProduct();
+                // User navigates manually via Skip (→) to next product
 
             } catch (error) {
                 showToast(`Errore: ${error.message}`, 'error');
                 btn.disabled = false;
                 btn.innerHTML = '<span class="action-btn-icon">✎</span><span>Rigenera Testi</span>';
+            }
+        }
+
+        async function regeneratePrice() {
+            if (!currentRecord) return;
+
+            if (!GEMINI_KEY) {
+                showToast('Inserisci la chiave Gemini nel login per usare Rigenera Stima', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-regen-price');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="action-btn-icon">⏳</span><span>Stima in corso...</span>';
+
+            try {
+                const f = currentRecord.fields;
+                const brand = f.Brand_TXT || f.Brand || '';
+                const category = f.Category_TXT || f.Category || '';
+                const condizione = f.Condizione || '';
+                const size = f['Tag Size'] || '';
+                const materiale = f.Materiale || '';
+                const listingTitle = f.Listing_Title || '';
+                const prezzoIniziale = f['€ Iniziale'] || '';
+
+                const prompt = 'Sei un esperto di moda vintage e resale. Stima il prezzo di rivendita su Vinted per questo capo.\n' +
+                    'Rispondi SOLO con il numero intero (es: 45), senza simbolo €, senza testo aggiuntivo.\n\n' +
+                    'Prodotto:\n' +
+                    'Brand: ' + brand + '\n' +
+                    'Categoria: ' + category + '\n' +
+                    'Condizione: ' + condizione + '\n' +
+                    'Taglia: ' + size + '\n' +
+                    'Materiale: ' + materiale + '\n' +
+                    'Titolo listing: ' + listingTitle + '\n' +
+                    'Prezzo acquisto: €' + prezzoIniziale;
+
+                const geminiResponse = await fetch(
+                    'https://api.apiyi.com/v1/chat/completions',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + GEMINI_KEY
+                        },
+                        body: JSON.stringify({
+                            model: 'gemini-2.0-flash',
+                            messages: [{ role: 'user', content: prompt }],
+                            max_tokens: 20,
+                            temperature: 0.2
+                        })
+                    }
+                );
+
+                if (!geminiResponse.ok) {
+                    const errData = await geminiResponse.json();
+                    throw new Error('APIyi ' + geminiResponse.status + ': ' + (errData.error?.message || JSON.stringify(errData)));
+                }
+
+                const geminiData = await geminiResponse.json();
+                const priceText = (geminiData.choices?.[0]?.message?.content || '').trim();
+                const priceNum = parseFloat(priceText.replace(/[^0-9.]/g, ''));
+
+                if (isNaN(priceNum) || priceNum <= 0) {
+                    throw new Error('Risposta APIyi non valida: "' + priceText + '"');
+                }
+
+                // Save to Airtable
+                await apiRequest(INVENTARIO_TABLE, {
+                    recordId: currentRecord.id,
+                    method: 'PATCH',
+                    body: { fields: { 'AI_Estimated_Value': priceNum } }
+                });
+
+                // Update local state and re-render
+                currentRecord.fields.AI_Estimated_Value = priceNum;
+                renderPhotoSection(currentRecord.fields);
+
+                showToast('Stima aggiornata: €' + priceNum + ' ✓', 'success');
+
+                btn.disabled = false;
+                btn.innerHTML = '<span class="action-btn-icon">€</span><span>Rigenera Stima</span>';
+
+            } catch (error) {
+                showToast('Errore stima: ' + error.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<span class="action-btn-icon">€</span><span>Rigenera Stima</span>';
             }
         }
 
